@@ -26,3 +26,8 @@ helm install -n elastic elasticsearch elastic/elasticsearch \
              --set volumeClaimTemplate.storageClassName=gp2 # block Storage
                                      # storageClassName=gp2는eks 생성시 default 설정되어 있어서 파라미터 삭제가능
                                      # 다른 storage Class를 생성하는경우 사용하면 됨
+
+
+# 점검하기
+kubectl get pods --namespace=elastic -l app=ds07297-mon-es-master -w
+kubectl port-forward -n elastic svc/ds07297-mon-es-master 9200
