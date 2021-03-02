@@ -21,7 +21,7 @@ helm install -n elastic elasticsearch elastic/elasticsearch \
 	     --version 7.11.1 \
 	     --set clusterName="ds07297-mon-es" \
 	     --set-string labels.Creator="ds07297" \
-	     --set-string labels.role="logmonitor" \
+	     --set-string labels.approle="logmonitor" \
 	     --set nodeSelector."node\\.role"=mon  \
              --set volumeClaimTemplate.storageClassName=gp2 # block Storage
                                      # storageClassName=gp2는eks 생성시 default 설정되어 있어서 파라미터 삭제가능
