@@ -1,0 +1,121 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+data:
+  # Configuration files: server, input, filters and output
+  # ======================================================
+  #  <source>  add_tag_prefix  prj-A
+  #  <filter ** >
+  #    @type record_transformer
+  #    <record>
+  #      # 쌍따옴표로 묶으면 Fluentd가 작동될때만 실행된다.
+  #      hostname "#{Socket.gethostname}"
+  #       tag      ${tag}
+  #    </record>
+  #  </filter>
+
+  fluent.conf: |
+    <source>
+      @type forward
+      port 24224
+      bind 0.0.0.0
+    </source>
+
+    <match ** >
+      @type elasticsearch
+      @id out_es
+      @log_level "info"
+      host  100.64.23.124
+      port  9200
+      logstash_prefix "logstash"
+      logstash_dateformat "%Y.%m.%d"
+      logstash_format true
+      index_name "logstash"
+      target_index_key
+      type_name "fluentd"
+    </match>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: fluentd-logging
+      version: v1
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-logging
+        version: v1
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+          node.role: be
+      containers:
+      - name: fluentd
+        image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
+        env:
+          - name:  FLUENT_ELASTICSEARCH_HOST
+            value: "100.64.23.124"
+          - name:  FLUENT_ELASTICSEARCH_PORT
+            value: "9200"
+          - name: FLUENT_ELASTICSEARCH_SCHEME
+            value: "http"
+          - name: FLUENT_UID
+            value: "0"
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: fluentd-config
+          mountPath: /fluentd/etc/
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: fluentd-config
+        configMap:
+          name: fluentd-config
+      serviceAccountName: fluentd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd-svc
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+spec:
+  ports:
+    - port: 24224
+      targetPort: 24224
+      protocol: TCP
+  selector:
+    k8s-app: fluentd-logging
