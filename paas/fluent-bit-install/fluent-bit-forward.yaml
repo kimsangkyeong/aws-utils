@@ -9,6 +9,7 @@ metadata:
 data:
   # Configuration files: server, input, filters and output
   # ======================================================
+  # @INCLUDE output-forward.conf
   fluent-bit.conf: |
     [SERVICE]
         Flush         1
@@ -46,15 +47,26 @@ data:
         Merge_Log_Key       log_processed
         K8S-Logging.Parser  On
         K8S-Logging.Exclude Off
+        Labels              Off
 
   output-forward.conf: |
     [OUTPUT]
         Name            forward
         Match           *
-        Host            10.2.152.186
+        Host            fluentd-svc.logging.svc.cluster.local
         Port            24224
         Retry_Limit     False
         Time_as_Integer True
+
+  output-elasticsearch.conf: |
+    [OUTPUT]
+        Name            es
+        Match           *
+        Host            100.64.23.253
+        Port            9200
+        Logstash_Format  On
+        index           logstash
+        Retry_Limit     6
 
   parsers.conf: |
     [PARSER]

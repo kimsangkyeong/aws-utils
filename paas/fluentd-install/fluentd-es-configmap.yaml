@@ -64,7 +64,8 @@ spec:
       - name: fluentd
         # image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
         #image: fluent/fluentd-kubernetes-daemonset:v1.12.0-debian-elasticsearch7-arm64-1.0
-        image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch7
+        #image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch7
+        image: purecap/custom-fluentd-es7:v1
         env:
 #         - name:  FLUENT_ELASTICSEARCH_HOST
 #           value: "100.64.23.253"

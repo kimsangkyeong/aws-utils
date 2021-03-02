@@ -16,7 +16,7 @@ helm repo add elastic https://helm.elastic.co
 # 설치할 namespace 생성하기
 kubectl create namespace elastic
 
-# helm 설치하기
+# helm 설치하기 
 helm install -n elastic elasticsearch elastic/elasticsearch \
 	     --version 7.11.1 \
 	     --set clusterName="ds07297-mon-es" \
