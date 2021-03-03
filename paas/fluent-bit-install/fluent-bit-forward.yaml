@@ -21,7 +21,7 @@ data:
 
     @INCLUDE input-kubernetes.conf
     @INCLUDE filter-kubernetes.conf
-    @INCLUDE output-forward.conf
+    @INCLUDE output-elasticsearch.conf
 
   input-kubernetes.conf: |
     [INPUT]
@@ -56,14 +56,12 @@ data:
     [FILTER]
         Name                nest
         Match               kube.*
-        Wildcard            pod_name
         Operation           lift
         Nested_under        kubernetes
         Add_prefix          kubernetes_
     [FILTER]
         Name                nest
         Match               kube.*
-        Wildcard            k8s-app
         Operation           lift
         Nested_under        kubernetes_labels
         Add_prefix          kubernetes_labels_
@@ -78,7 +76,7 @@ data:
     [FILTER]
         Name                rewrite_tag
         Match               kube.*
-        Rule                $kubernetes_pod_name ^.*$ kubernetes_logs false
+        Rule                $kubernetes_pod_name ^.*$ kubernetes_logs.${HOSTNAME} false
 
   output-stdout.conf: |
     [OUTPUT]
