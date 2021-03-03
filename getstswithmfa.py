@@ -14,7 +14,7 @@ import boto3
 import sys
 import io
 
-#-*-coding: utf-8
+# coding= utf-8 
 def setEnvironment():
     sys.stdin  = io.TextIOWrapper(sys.stdin.detach(), encoding = 'utf-8')
     sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
