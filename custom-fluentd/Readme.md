@@ -8,5 +8,5 @@
 |1|docker 기동하기|sudo systemctl docker start|
 |2|docker login 하기|sudo docker login|
 |3|Dockerfile 보완하기|vi Dockerfile|
-|4|docker build 하기|sudo docker build -t <repository>/custom-fluentd:v1.0 .|
-|5|docker repository upload 하기|sudo docker push|
+|4|docker build 하기|sudo docker build -t [repository]/custom-fluentd:v1.0 .|
+|5|docker repository upload 하기|sudo docker push [repository]/custom-fluentd:v1.0|
