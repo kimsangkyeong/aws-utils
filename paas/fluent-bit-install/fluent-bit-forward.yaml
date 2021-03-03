@@ -9,7 +9,6 @@ metadata:
 data:
   # Configuration files: server, input, filters and output
   # ======================================================
-  # @INCLUDE output-forward.conf
   fluent-bit.conf: |
     [SERVICE]
         Flush         1
@@ -31,9 +30,15 @@ data:
         Path              /var/log/containers/*.log
         Parser            docker
         DB                /var/log/flb_kube.db
-        Mem_Buf_Limit     50MB
-        Skip_Long_Lines   On
-        Refresh_Interval  10
+        Mem_Buf_Limit     5MB
+        Skip_Long_Lines   Off
+        Refresh_Interval  5
+
+    [INPUT]
+        Name              tail
+        Tag               kubelet.err
+        Path              /k/kubelet.err.log
+        DB                /fluent-bit/tail_kubelet.db
 
   filter-kubernetes.conf: |
     [FILTER]
@@ -46,8 +51,39 @@ data:
         Merge_Log           On
         Merge_Log_Key       log_processed
         K8S-Logging.Parser  On
-        K8S-Logging.Exclude Off
-        Labels              Off
+        K8S-Logging.Exclude On
+        Labels              On
+    [FILTER]
+        Name                nest
+        Match               kube.*
+        Wildcard            pod_name
+        Operation           lift
+        Nested_under        kubernetes
+        Add_prefix          kubernetes_
+    [FILTER]
+        Name                nest
+        Match               kube.*
+        Wildcard            k8s-app
+        Operation           lift
+        Nested_under        kubernetes_labels
+        Add_prefix          kubernetes_labels_
+    [FILTER]
+        Name                modify
+        Match               kube.*
+        Copy     kubernetes_labels_k8s-app  kubernetes_app_labels
+    [FILTER]
+        Name                modify
+        Match               kube.*
+        Copy     kubernetes_labels_app  kubernetes_app_labels
+    [FILTER]
+        Name                rewrite_tag
+        Match               kube.*
+        Rule                $kubernetes_pod_name ^.*$ kubernetes_logs false
+
+  output-stdout.conf: |
+    [OUTPUT]
+        Name            stdout
+        Match           *
 
   output-forward.conf: |
     [OUTPUT]
@@ -96,6 +132,13 @@ data:
         Time_Format %d/%b/%Y:%H:%M:%S %z
 
     [PARSER]
+        Name   k8s-nginx-ingress
+        Format regex
+        Regex ^(?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)" (?<request_length>[^ ]*) (?<request_time>[^ ]*) \[(?<proxy_upstream_name>[^ ]*)\] (\[?<proxy_alternative_upstream_name>[^ ]*)\] )?(?<upstream_addr>[^ ]*) (?<upstream_response_length>[^ ]*) (?<upstream_response_time>[^ ]*) (?<upstream_status>[^ ]*) (?<reg_id>[^ ]*).*$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
         Name   json
         Format json
         Time_Key time
@@ -109,11 +152,43 @@ data:
         Time_Keep   On
 
     [PARSER]
+        Name        docker-daemon
+        Format      regex
+        Regex       time="(?<time>[^ ]*)" level=(?<level>[^ ]*) msg="(?<msg>[^ ].*)"
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   On
+
+    [PARSER]
         Name        syslog
         Format      regex
         Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
         Time_Key    time
         Time_Format %b %d %H:%M:%S
+
+    [PARSER]
+        Name        syslog-rfc5424
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]{1,5})\>1 (?<time>[^ ]+) (?<host>[^ ]+) (?<ident>[^ ]+) (?<pid>[-0-9]+) (?<msgid>[^ ]+) (?<extradata>(\[(.*?)\]|-)) (?<message>.+)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   On
+
+    [PARSER]
+        Name        syslog-rfc3164-local
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+        Time_Key    time
+        Time_Format %b %d %H:%M:%S
+        Time_Keep   On
+
+    [PARSER]
+        Name        syslog-rfc3164
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+        Time_Key    time
+        Time_Format %b %d %H:%M:%S
+        Time_Keep   On
 ---
 apiVersion: apps/v1
 kind: DaemonSet

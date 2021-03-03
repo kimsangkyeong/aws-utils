@@ -1,6 +1,7 @@
 #! /usr/bin/sh
 
-# Step1. Amazon EKS Cluster에IAM Role을 가지고 Kubernetetes service account에 IAM Role을 연결가능 
+# Step1. AWS eksworkshop 을 참고하여 배포하기 정보 
+#        Amazon EKS Cluster에IAM Role을 가지고 Kubernetetes service account에 IAM Role을 연결가능 
 #        이 service account 는 service account를 사용하는 pod의 contianer에 AWS permission을 제공
 #        이렇게 하면 더이상 node의 IAM role에 permission을 확장하지 않아도 된다.
 #        https://www.eksworkshop.com/intermediate/230_logging/prereqs/
@@ -18,7 +19,7 @@
 #export ACCOUNT_ID="accountid"
 #export ES_DOMAIN_NAME="eksworkshop-logging"
 #
-#cat <<EoF > ~/environment/logging/fluent-bit-policy.json
+#cat <<EoF > ~/environment/logging/fluentd-policy.json
 #{
 #    "Version": "2012-10-17",
 #    "Statement": [
@@ -34,18 +35,18 @@
 #EoF
 #
 #aws iam create-policy   \
-#  --policy-name fluent-bit-policy \
-#  --policy-document file://~/environment/logging/fluent-bit-policy.json
+#  --policy-name fluentd-policy \
+#  --policy-document file://~/environment/logging/fluentd-policy.json
 #
 # 1-3 Create an IAM role
 #
 #kubectl create namespace logging
 #
 #eksctl create iamserviceaccount \
-#    --name fluent-bit \
+#    --name fluentd \
 #    --namespace logging \
 #    --cluster eksworkshop-eksctl \
-#    --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/fluent-bit-policy" \
+#    --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/fluentd-policy" \
 #    --approve \
 #    --override-existing-serviceaccounts
 #
@@ -69,11 +70,11 @@ kubectl apply -f fluentd-role.yaml
 # 2-4. fluetd를 deployment로 배포하기
 # 참고파일을 받아서 daemonset -> deployment 수정, serviceAccountName: fluentd 추가
 #            ( https://github.com/fluent/fluentd-kubernetes-daemonset )
-# fluent-bit와 fluentd는 config 파일 구성이 다름 유의할 것 
-# (https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file,
-#  https://docs.fluentd.org/configuration/config-file)
-wget -O fluentd-es.yaml  https://raw.githubusercontent.com/fluent/fluentd-kubernetes-daemonset/master/fluentd-daemonset-elasticsearch.yaml
-kubectl apply -f fluentd-es.yaml
-
+# ## fluent-bit와 fluentd는 config 파일 구성이 다름 유의할 것 
+#   (https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file,
+#    https://docs.fluentd.org/configuration/config-file)
+# ## custom flentd를 만들어서 사용하기 : https://github.com/garystafford/custom-fluentd
+# ## input은 fluent-bit에서 전달한 데이타로 설정하도록 구성한다.
+kuebctl apply -f fluentd-es-configmap.yaml
 
 #

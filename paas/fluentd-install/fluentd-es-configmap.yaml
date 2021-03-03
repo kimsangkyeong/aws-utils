@@ -11,21 +11,38 @@ data:
   # ======================================================
 
   fluent.conf: |
+    <system>
+      log_level info
+    </system>
+
     <source>
-      @type forward
+      @id   fluent-bit_forward
+      @type forward 
       port 24224
       bind 0.0.0.0
       @label @RAW
     </source>
 
     <label @RAW>
+      <filter **>
+        @type record_transformer
+        <record>
+          fd-host "#{Socket.gethostname}"
+        </record>
+      </filter>
       <match ** >
+        @id    out_es
         @type  elasticsearch
         scheme http
         host   100.64.23.253
         port   9200
         logstash_format true
         index_name logstash
+        <buffer>
+          @type file
+          path  /fluentd/log/fluentd.buff
+          @include out_buf_params.conf
+        </buffer>
       </match>
     </label>
     # for debugging
@@ -34,6 +51,16 @@ data:
         @type stdout
       </match>
     </label>
+
+  out_buf_params.conf: |
+    <buffer>
+      flush_interval 5s
+      total_limit_size 100m
+      chunk_limit_size 1m
+      retry_wait 1
+      retry_type exponential_backoff
+    </buffer>
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -65,7 +92,7 @@ spec:
         # image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
         #image: fluent/fluentd-kubernetes-daemonset:v1.12.0-debian-elasticsearch7-arm64-1.0
         #image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch7
-        image: purecap/custom-fluentd-es7:v1
+        image: purecap/custom-fluentd-es7:v1.1
         env:
 #         - name:  FLUENT_ELASTICSEARCH_HOST
 #           value: "100.64.23.253"
