@@ -26,12 +26,23 @@ helm search repo cortex-helm
 # helm 설치하기 
 helm install -n cortex cortex cortex-helm/cortex \
 	--set alertmanager.persistentVolume.storageClass="gp2" \
-	--set server.persistentVolume.storageClass="gp2" \
-	--set server.nodeSelector."node\\.role"=mon \
-	--set server.podLabels.approle=merge-metrics \
-	--set pushgateway.nodeSelector."node\\.role"=mon \
-	--set pushgateway.podLabels.approle=merge-metrics
+	--set alertmanager.podLabels.approle=alert-metrics \
+	--set compactor.persistentVolume.storageClass="gp2" \
+	--set compactor.podLabels.approle=compactor-metrics \
+	--set configs.podLabels.approle=configs-cortex \
+	--set distributor.podLabels.approle=distributor-cortex \
+	--set ingester.podLabels.approle=ingester-cortex \
+	--set nginx.podLabels.approle=nginx-cortex \
+	--set querier.podLabels.approle=querier-cortex \
+	--set ruler.podLabels.approle=ruler-cortex \
+	--set serviceAccount.name=cortex \
+	--set store_gateway.podLabels.approle=store_gateway-cortex \
+	--set table_manager.podLabels.approle=store_gateway-cortex 
 
 # 점검하기
-kubectl get pods --namespace=cortex -l approle=cortex -w
+kubectl get pods --namespace=cortex -w
+
+# UI로 점검하기
+kubectl --namespace cortex port-forward service/cortex
+curl http://127.0.0.1:/api/prom/label
 

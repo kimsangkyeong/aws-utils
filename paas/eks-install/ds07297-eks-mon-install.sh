@@ -108,4 +108,8 @@ EOF
 
 eksctl create nodegroup --config-file=$CLUSTER_NAME"-managed-nodegroups.yaml"
 
+# nodegroup 삭제하기
+eksctl delete nodegroup mngrp-mon --cluster $CLUSTER_NAME
+# cluster 삭제하기
+eksctl delete cluster --name  $CLUSTER_NAME
 

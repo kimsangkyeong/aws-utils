@@ -16,6 +16,9 @@ helm repo add elastic https://helm.elastic.co
 # 설치할 namespace 생성하기
 kubectl create namespace elastic
 
+# chart value 확인하기
+helm show values elastic/elasticsearch > values.yaml
+
 # helm 설치하기 
 helm install -n elastic elasticsearch elastic/elasticsearch \
 	     --version 7.11.1 \
@@ -23,6 +26,7 @@ helm install -n elastic elasticsearch elastic/elasticsearch \
 	     --set-string labels.Creator="ds07297" \
 	     --set-string labels.approle="logmonitor" \
 	     --set nodeSelector."node\\.role"=mon  \
+	     --set replicas=3  \ 
              --set volumeClaimTemplate.storageClassName=gp2 # block Storage
                                      # storageClassName=gp2는eks 생성시 default 설정되어 있어서 파라미터 삭제가능
                                      # 다른 storage Class를 생성하는경우 사용하면 됨

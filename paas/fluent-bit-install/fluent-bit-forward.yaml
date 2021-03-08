@@ -96,7 +96,7 @@ data:
     [OUTPUT]
         Name            es
         Match           *
-        Host            100.64.23.253
+        Host            ds07297-mon-es-master.elastic.svc.cluster.local
         Port            9200
         Logstash_Format  On
         index           logstash

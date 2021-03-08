@@ -25,10 +25,10 @@ helm show values prometheus-community/prometheus > values.yaml
 helm install -n prometheus prometheus prometheus-community/prometheus \
 	--set alertmanager.persistentVolume.storageClass="gp2" \
 	--set server.persistentVolume.storageClass="gp2" \
-	--set server.nodeSelector."node\\.role"=be \
-	--set server.podLabels.approle=local-prometheus \
-	--set pushgateway.nodeSelector."node\\.role"=be \
-	--set pushgateway.podLabels.approle="local-prometheus"
+	--set server.nodeSelector."node\\.role"=mon \
+	--set server.podLabels.creator=ds07297 \
+	--set pushgateway.nodeSelector."node\\.role"=mon \
+	--set pushgateway.podLabels.creator=ds07297
 
 # 점검하기
 kubectl get pods --namespace=prometheus -l app=prometheus -w

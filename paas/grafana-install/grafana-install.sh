@@ -39,17 +39,21 @@ helm install -n grafana grafana grafana/grafana \
         --set persistence.storageClassName="gp2" \
         --set persistence.enabled=true \
         --set adminPassword='EKS!sAWSome' \
-	--set nodeSelector."node\\.role"=be \
+	--set nodeSelector."node\\.role"=mon \
         --values ./grafana.yaml \
-        --set service.type=LoadBalancer \
-        --set service.labels.approle=local-grafana \ 
-        --set podLabels.approle=local-grafana 
+        --set service.type=ClusterIP \
+        --set service.labels.creator=ds07297 \ 
+        --set podLabels.creator=ds07297
 
 # 점검하기
 kubectl get pods --namespace=grafana -l app.kubernetes.io/name=grafana -w
 
+## service.Type=LoadBalancer 일 경우
 export ELB=$(kubectl get svc --namespace grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 echo "http://$ELB:80"
+## service.Type=ClusterIP 일 경우
+kubectl port-forward -n grafana deployment/grafana 8081:3000
+http://localhost:8081/
 
 # password 획득하기
 kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo

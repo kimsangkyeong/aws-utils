@@ -122,6 +122,25 @@ managedNodeGroups:
       /etc/eks/bootstrap.sh ${CLUSTER_NAME} --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup-image=ami-0ee5bb0be5fd09f21'
 EOF
 
-eksctl create nodegroup --config-file= $CLUSTER_NAME"-managed-nodegroups.yaml"
+#eksctl create nodegroup --config-file= $CLUSTER_NAME"-managed-nodegroups.yaml"
 
+# eksctl parameter 생성
+eksctl create nodegroup \
+	--name    mngrp-mon \
+	--cluster ds07297-eks \
+	--tags    "Creator=ds07297,Env=develop,Operator=admin" \
+        --region  us-west-1 \
+	--nodes-min 4 \
+	--nodes-max 5 \
+	--node-volume-size 30 \
+	--ssh-access \
+	--ssh-public-key "ds07297-kpair" \
+	--node-private-networking \
+	--node-labels "node.role=mon,env=develop" \
+	--instance-prefix "mon" \
+	--instance-types "t3.xlarge" \
+	--managed \
+	--asg-access \
+	--external-dns-access \
+	--alb-ingress-access  
 

@@ -18,6 +18,6 @@ kubectl apply -f fluent-bit-role.yaml
 # ## fluent-bit config 참조
 #   (https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file,
 # ## output은 fluentd로 forward 하도록 설정한다.
-kuebctl apply -f fluent-bit-forward.yaml
+kubectl apply -f fluent-bit-forward.yaml
 
 #

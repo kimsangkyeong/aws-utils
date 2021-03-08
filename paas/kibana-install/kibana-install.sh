@@ -19,7 +19,9 @@ kubectl create namespace kibana
 # helm 설치하기
 helm install -n kibana kibana elastic/kibana \
 	     --version 7.11.1 \
-	     --set elasticsearchHosts="http://ds07297-mon-es-master.elastic.svc.cluster.local:9200" 
+	     --set nodeSelector."node\\.role"=mon  \
+             --set-string labels.Creator="ds07297" \
+	     --set elasticsearchHosts="http://ds07297-mon-es-master.elastic.svc.cluster.local:9200"  
                    # service name & namespace 포함할 것.
 
 # 참고사항 : workgroup을 3개 node로 elasticsearch 배포상태에에서는 배포 시 pending
