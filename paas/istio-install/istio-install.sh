@@ -17,7 +17,13 @@ istioctl profile dump demo -o yaml > demo-values.yaml
 
 # istio 설치하기 
 #   IstioOperator Options : https://istio.io/latest/docs/reference/config/istio.operator.v1alpha1/
-
+#   Loadbalancer type을 설정하면, CLB가 생성됨. NLB를생성하고자 하면 annotaion 추가 필요
+#   참고 : https://istio.io/latest/blog/2018/aws-nlb/
+#          gateways:
+#            istio-ingressgateway:
+#              serviceAnnotations:
+#                service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+#
 istioctl install -f default-values.yaml
 
 # 점검하기
