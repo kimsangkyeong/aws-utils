@@ -49,17 +49,17 @@ istioctl analyze
 ELB=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 http://${ELB}/productpage
 
-# addon dashboard
+# addons dashboard
 #-- prometheus, grafana가 따로 설치된 경우addon을 targetting 한다.
 #-- 별도 설치 후 연결하기가 잘 안되어서 addon으로 같이 설치함
-kubectl apply -f samples/addon/jaeger.yaml
-kubectl apply -f samples/addon/kiali.yaml
+kubectl apply -f samples/addons/jaeger.yaml
+kubectl apply -f samples/addons/kiali.yaml
 #-- kiali 설치 시 오류 발생(unable to recognize "samples/addons/kiali.yaml": no matches for kind "MonitoringDashboard" in version "monitoring.kiali.io/v1alpha1") => kiali.yaml의 crd에 --- 2개 연속으로 해서 발생하는 오류로 판단됨. --- ... 짝을 이루도록 수정 후 설치할 것
 #-- kiali에서 외부 prometheus 설정확대하기참조 
 #   https://kiali.io/documentation/latest/runtimes-monitoring/#_prometheus_configuration
-kubectl apply -f samples/addon/extras/zipkin.yaml
-kubectl apply -f samples/addon/prometheus.yaml
-kubectl apply -f samples/addon/grafana.yaml
+kubectl apply -f samples/addons/extras/zipkin.yaml
+kubectl apply -f samples/addons/prometheus.yaml
+kubectl apply -f samples/addons/grafana.yaml
 
 # kiali Dashboard
 kubectl port-forward -n istio-system  deployment/kiali 20001

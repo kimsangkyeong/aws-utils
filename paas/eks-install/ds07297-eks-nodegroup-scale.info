@@ -1,0 +1,64 @@
+#참고 URL : https://aws.amazon.com/ko/premiumsupport/knowledge-center/eks-worker-node-actions/
+
+#1. 작업자 노드 확인
+$ kubectl get nodes -o wide
+
+#2. 단일 작업자 노드에 대한 추가 정보 가져오기
+$ kubectl describe node/node_name
+
+#3. 작업자 노드 조정
+# 3-1. eksctl 을 사용하여, 관리형 또는 비관리형 작업자 노드 조정하기
+$ eksctl scale nodegroup --cluster=clusterName --nodes=desiredCount --name=nodegroupName
+
+# 3-2. eksctl 없이 관리자 작업자 노드 조정은 console 로
+#      web console의 노드그룹 구성설정편집
+
+# 3-3. AWS CloudFormation을 사용하여 비관리형 작업자 노드를조정하기
+# AWS Cloud Stack에서 NodeAutoScalingGroupDesiredCapacty, 
+#       NodeAutoScalingGroupMinSize, NodeAutoScalingGroupMaxSize 파라미터 수정하기
+ 
+#4. 작업자 노드 드레이닝
+# 중요 : 드레이닝 작업은 작업자 노드를 격리하고 노드에서 새 포드 예약을 중지하도록 Kubernetes에 지시한다. 대상 노드에서 실행중인 포드는 드레이닝 노드에서 제거되므로 포드가 중지된다.
+
+# 전체 노드 그룹 또는 단일 작업자 노드를 드레이닝 할 수 있다.
+# 4-1. 전체 노드 그룹을 드레이닝 하기
+$ eksctl drain nodegroup --cluster=clusterName --name=nodegroupName
+
+# 4-1-1. 노드 그룹의 드레이닝 작업을 실행취소하기
+$ eksctl drain nodegroup --cluster=clusterName --name=nodegroupName --undo
+
+# 4-2. eksctl을 사용하여 작업자 노드를 시작하지 않는 경우는 다음의 코드를 사용하여 특정 kubernetes 버전의 모든 노드를 식별하고 드레이닝합니다. (다음 예제는 1.14.7-eks-1861c5)
+# 참고 : 작업자 노드의 버전을 가져오려면 다음명령을 실행 
+$ kubectl get nodes
+
+#!/bin/bash
+K8S_VERSION=1.14.7-eks-1861c5
+nodes=$(kubectl get nodes -o jsonpath="{.items[?(@.status.nodeInfo.kubeletVersion==\"v$K8S_VERSION\")].metadata.name}")
+for node in ${nodes[@]}
+do
+    echo "Draining $node"
+    kubectl drain $node --ignore-daemonsets --delete-local-data
+done
+
+# 4-2-1. eksctl을 사용하여 작업자 노드를 시작하지 않는 경우는 다음의 코드를 사용하여 특정 kubernetes >버전의 모든 노드를 드레이닝 작업을 실행 취소합니다. (다음 예제는 1.14.7-eks-1861c5)
+
+#!/bin/bash
+K8S_VERSION=1.14.7-eks-1861c5
+nodes=$(kubectl get nodes -o jsonpath="{.items[?(@.status.nodeInfo.kubeletVersion==\"v$K8S_VERSION\")].metadata.name}")
+for node in ${nodes[@]}
+do
+    echo "Undo Draining $node"
+    kubectl uncordon $node 
+done
+
+# 4-3. 단일 작업자 노드 드레이닝
+# eksctl을 사용하여 작업자 노드를 시작하지 않거나 특정 노드만 드레이닝하려면, 다음 명령 실행하여 정상적으로 격리한다.
+$ kubectl drain node_name --ignore-daemonsets
+
+# 4-3-1. 단일 작업자 노드 드레이닝 취소하기
+$ kubectl uncordon node_name
+
+# 4-4. 작업자 노드 삭제하기
+# 중요 : 삭제작업은 복구할 수 없음.
+$ eksctl delete nodegroup --cluster=clusterName --name=nodegroupName
+
