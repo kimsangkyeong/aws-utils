@@ -6,8 +6,10 @@
 import socket
 
 
-# 접속할 서버 주소입니다. 여기에서는 루프백(loopback) 인터페이스 주소 즉 localhost를 사용합니다. 
-HOST = '127.0.0.1'
+# 접속할 서버 주소입니다. 
+# HOST = ''  - Any client 대기
+# HOST = '127.0.0.1' 특정서버루프백(loopback) 인터페이스 주소 즉 localhost를 사용합니다. 
+HOST = ''
 
 # 클라이언트 접속을 대기하는 포트 번호입니다.   
 PORT = 9999        

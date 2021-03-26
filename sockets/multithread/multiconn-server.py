@@ -40,7 +40,10 @@ def threaded(client_socket, addr):
     client_socket.close()
 
 
-HOST = '127.0.0.1'
+# 접속 대기할 서버 정보
+# HOST = ''  - Any Client 대기
+# HOST = '127.0.0.1'  - 루프백 인터페이스 local sever
+HOST = ''
 PORT = 9999
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
