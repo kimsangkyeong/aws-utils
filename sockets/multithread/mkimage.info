@@ -1,0 +1,13 @@
+# 참고하기
+# - https://gitlab.com/python-devs/ci-images/tree/master
+# $ docker run quay.io/python-devs/ci-image:master python3.8 -c "import sys; print(sys.version)"
+# $ docker pull quay.io/python-devs/ci-image:master
+# quay.io/python-devs/ci-image:master
+#
+
+1. Dockerfile 점검
+2. sudo docker build --tag purecap/python38_socket_client:1.0 .
+3. sudo docekr images
+4. sudo docker login 
+5. sudo docker push purecap/python38_socket_client:1.0
+6. k8s pod 생성하기 - deployment.yaml 참조

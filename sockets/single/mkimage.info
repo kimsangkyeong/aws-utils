@@ -1,0 +1,6 @@
+1. Dockerfile 점검
+2. sudo docker build --tag purecap/python38_socket_echo_client:1.0 .
+3. sudo docekr images
+4. sudo docker login 
+5. sudo docker push purecap/python38_socket_echo_client:1.0
+6. k8s pod 생성하기 - deployment.yaml 참조

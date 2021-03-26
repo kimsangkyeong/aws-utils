@@ -8,19 +8,26 @@ import socket
 
 
 # 서버의 주소입니다. hostname 또는 ip address를 사용할 수 있습니다.
-HOST = input("접속서버 IP 입력해주세요.- default:100.64.17.136 >>> ") or  '100.64.17.136'
+#HOST = input("접속서버 IP 입력해주세요.- default:100.64.17.136 >>> ") or  '100.64.17.136'
+HOST = '100.64.17.136'
+#HOST = '10.2.201.154'
 
 # 서버에서 지정해 놓은 포트 번호입니다. 
-PORT = int(input("접속서버 Port 번호를 입력해주세요. - default:9999 >>> ") or 9999)
+#PORT = int(input("접속서버 Port 번호를 입력해주세요. - default:9999 >>> ") or 9999)
+PORT = 9999
 
+print(" connect : {} : {} ".format(HOST,PORT))
 
 # 소켓 객체를 생성합니다. 
 # 주소 체계(address family)로 IPv4, 소켓 타입으로 TCP 사용합니다.  
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+print(" socket init  success ", client_socket)
 
 # 지정한 HOST와 PORT를 사용하여 서버에 접속합니다. 
 client_socket.connect((HOST, PORT))
+
+print(" socket connect success ")
 
 # 메시지를 전송합니다. 
 client_socket.sendall('안녕'.encode())
