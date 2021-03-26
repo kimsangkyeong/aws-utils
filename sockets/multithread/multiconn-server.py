@@ -43,8 +43,11 @@ def threaded(client_socket, addr):
 # 접속 대기할 서버 정보
 # HOST = ''  - Any Client 대기
 # HOST = '127.0.0.1'  - 루프백 인터페이스 local sever
-HOST = ''
-PORT = 9999
+#HOST = ''
+#PORT = 9999
+HOST=input("수신할 client 서버IP를 입력하시오. default:'' >>> ") or ''
+PORT=int(input("수신할 Port 번호를 입력하시오. default:9999 >>> ") or 9999)
+
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
