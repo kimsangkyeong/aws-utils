@@ -6,8 +6,10 @@
 import socket
 
 
-HOST = '100.64.17.136'
-PORT = 9999
+#HOST = '100.64.17.136'
+#PORT = 9999
+HOST = input("접속서버 IP 입력해주세요.- default:100.64.17.136 >>> ") or  '100.64.17.136'
+PORT = int(input("접속서버 Port 번호를 입력해주세요. - default:9999 >>> ") or 9999)
 
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 

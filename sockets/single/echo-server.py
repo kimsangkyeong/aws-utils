@@ -9,10 +9,10 @@ import socket
 # 접속할 서버 주소입니다. 
 # HOST = ''  - Any client 대기
 # HOST = '127.0.0.1' 특정서버루프백(loopback) 인터페이스 주소 즉 localhost를 사용합니다. 
-HOST = ''
+HOST=input("수신할 client 서버IP를 입력하시오. default:'' >>> ") or ''
 
 # 클라이언트 접속을 대기하는 포트 번호입니다.   
-PORT = 9999        
+PORT=int(input("수신할 Port 번호를 입력하시오. default:9999 >>> ") or 9999)
 
 
 # 소켓 객체를 생성합니다. 
