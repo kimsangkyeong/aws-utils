@@ -1,8 +1,14 @@
-#
-# echo-server.py 
-#
-# https://webnautes.tistory.com/1381
-#
+##############################################################################
+# 목적 : single thread socket server program                                 #
+# 조건 : python3 이상                                                        #
+# 예시 : 설명보기 > python echo-server.py -h                                 #
+#        Any client listen : python echo-server.py -p 9999                   #
+#        local listen : python echo-server.py -i 127.0.0.1 -p 9999           #
+# -------------------------------------------------------------------------- #
+#  ver       date       author       description                             #
+# -------------------------------------------------------------------------- #
+#  1.0    2021.3.28      ksk         최초 개발                               #
+##############################################################################
 import sys, getopt
 import argparse
 import socket

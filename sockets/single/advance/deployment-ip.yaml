@@ -18,7 +18,7 @@ spec:
       - image: purecap/python38_socket_echo_client:1.0
         imagePullPolicy: Always
         name: app-echo-client
-        args: ["-i", "100.64.17.136", "-p", "9999"]
+        args: ["-i", "10.2.199.178", "-p", "9999"]
         ports:
         - containerPort: 9999
 

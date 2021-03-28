@@ -1,8 +1,14 @@
-#
-# multiconn-server.py
-#
-#
-#
+##############################################################################
+# 목적 : multithread socket server program                                   #
+# 조건 : python3 이상                                                        #
+# 예시 : 설명보기 > python multiconn-server.py -h                            #
+#        Any client listen : python multiconn-server.py -p 9999              #
+#        local listen : python multiconn-server.py -i 127.0.0.1 -p 9999      #
+# -------------------------------------------------------------------------- #
+#  ver       date       author       description                             #
+# -------------------------------------------------------------------------- #
+#  1.0    2021.3.28      ksk         최초 개발                               #
+##############################################################################
 import sys, getopt
 import argparse
 import socket
@@ -32,8 +38,6 @@ def threaded(client_socket, addr):
 
     print('Connected by :', addr[0], ':', addr[1])
 
-
-
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
     while True:
 
@@ -61,6 +65,7 @@ def threaded(client_socket, addr):
 def main(argv):
 
   args = cmd_parse()
+
   HOST = args.ip
   PORT = int(args.port)
 

@@ -1,0 +1,24 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: multisocket-client
+spec:
+  selector:
+    matchLabels:
+      app: multisocket-client
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: multisocket-client
+    spec:
+      containers:
+      - image: purecap/python38_socket_client:1.0
+        imagePullPolicy: Always
+        name: app-multisocket-client
+        args: ["-n", "ext-socket.default.svc.cluster.local", "-p", "9999"]
+        ports:
+        - containerPort: 9999
+

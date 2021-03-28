@@ -1,9 +1,14 @@
-#
-# echo-remote-client.py
-#
-# https://webnautes.tistory.com/1381
-#
-
+##############################################################################
+# 목적 : single thread socket client program (default : test node ip)        #
+# 조건 : python3 이상                                                        #
+# 예시 : 설명보기 > python echo-remote-client.py -h                          #
+#        python echo-remote-client.py -n google.com -p 9999                  #
+#        python echo-remote-client.py -i 10.2.1.156 -p 9999                  #
+# -------------------------------------------------------------------------- #
+#  ver       date       author       description                             #
+# -------------------------------------------------------------------------- #
+#  1.0    2021.3.28      ksk         최초 개발                               #
+##############################################################################
 import sys, getopt
 import argparse
 import socket
@@ -11,6 +16,7 @@ import socket
 def cmd_parse():
   cmdlines = [
       # data means => 0:option, 1:dest , 2:nargs , 3:default , 4:help
+      { '-n' : ('hostname', '?', 'none', 'socket hostname to connect server ' )},
       { '-i' : ('ip'   , '?', '100.64.17.136', 'socket ipaddress to connect server ' )},
       { '-p' : ('port' , '?', '9999', 'socket port to connect server' )}
              ]
@@ -28,11 +34,15 @@ def cmd_parse():
 def main(argv):
 
   args = cmd_parse()
-  HOST = args.ip
-  PORT = int(args.port)
 
-  print(" connect : {} : {} ".format(HOST,PORT))
- 
+  PORT = int(args.port)
+  if args.hostname != 'none':
+    HOST = socket.gethostbyname(args.hostname)
+    print(" hostname connect >> {} - {} : {} ".format(args.hostname,HOST,PORT))
+  else:
+    HOST = args.ip
+    print(" ip connect >> {} : {} ".format(HOST,PORT))
+
   # 소켓 객체를 생성합니다. 
   # 주소 체계(address family)로 IPv4, 소켓 타입으로 TCP 사용합니다.  
   client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
