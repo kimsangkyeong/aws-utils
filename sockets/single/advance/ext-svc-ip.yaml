@@ -13,7 +13,7 @@ metadata:
   name: ext-socket
 subsets:
   - addresses:
-    - ip: 100.64.17.136 # 100.64.17.136  54.219.215.60
+    - ip: 100.64.16.254 # proxyserver :100.64.16.254, bastion- 100.64.17.136, 54.219.215.60
     ports:
     - port: 9999
 
