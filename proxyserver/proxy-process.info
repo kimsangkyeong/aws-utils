@@ -1,0 +1,13 @@
+# 시나리오1. pod (http call)  ->   Proxy server -> target server
+#         1) external service 생성 :  proxy server로 pass_proxy 구성
+#         2) pod : external service를 http 호출
+#         3) proxy server : http 처리 - listen port 혹은 URI Pattern을 이용하여 pass_proxy 구성
+#         4) target server : 방화벽/validation은 proxy server ip로 처리 
+#
+# 시나리오2. pod (tcp socekt client)  ->   Proxy server -> target server
+#         1) external service 생성 :  proxy server로 pass_proxy 구성
+#         2) pod : external service로 connection 요청
+#         3) proxy server : stream 처리 - listen port로 pass_proxy 구성
+#         4) target server : 방화벽/validation은 proxy server ip로 처리 
+
+
