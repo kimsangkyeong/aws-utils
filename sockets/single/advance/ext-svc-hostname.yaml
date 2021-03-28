@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-naver
+spec:
+  type: ExternalName
+  externalName: naver.com #  externalName: api.plos.org
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: https
+    port: 443
+    targetPort: 443
+
+# Test 방법
+# kubectl  exec -it checkutils -c curl -- curl -H "Host:api.plos.org" http://ext-naver
+# kubectl  exec -it checkutils -c curl -- curl -k -H "Host:naver" https://ext-naver

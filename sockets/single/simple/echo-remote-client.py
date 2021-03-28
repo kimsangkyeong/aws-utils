@@ -10,7 +10,7 @@ import socket
 # 서버의 주소입니다. hostname 또는 ip address를 사용할 수 있습니다.
 #HOST = input("접속서버 IP 입력해주세요.- default:100.64.17.136 >>> ") or  '100.64.17.136'
 HOST = '100.64.17.136'
-#HOST = '10.2.201.154'
+#HOST = '10.2.199.178'
 
 # 서버에서 지정해 놓은 포트 번호입니다. 
 #PORT = int(input("접속서버 Port 번호를 입력해주세요. - default:9999 >>> ") or 9999)
