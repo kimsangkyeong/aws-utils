@@ -10,4 +10,11 @@
 #         3) proxy server : stream 처리 - listen port로 pass_proxy 구성
 #         4) target server : 방화벽/validation은 proxy server ip로 처리 
 
+# 장애 대응력 강화 관련
+# 1. Private Hosted Zone을 등록하는 경우resolve 대상 VPC를 선택하기 때문에 DNS 인식 범위 확인
+# 2. Route53을 이용한 Weighted 방식은 TTL을 60초로 셋팅하면, 장애시 1분 이내에 전환 가능 예상
+# 3. Route53의 health check는 public ip를 갖고 있는 경우에서만 체크를 할 수 있는 것으로 보임
+#    이때도 security group에 Route53의 checker의 AWS IP 대역을 Open 해 주어야 함.
+# 4. NAT Instance의 Proxy Server를 안전하고 효율적으로 운영하는 방식으로는 이중화 구성은 OK
+#    해당 Proxy Server의 상태 점검을 실시간으로 할 수 있는 방안 마련이 필요함.
 

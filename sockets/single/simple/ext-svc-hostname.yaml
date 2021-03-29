@@ -5,7 +5,7 @@ metadata:
   name: ext-naver
 spec:
   type: ExternalName
-  externalName: app1.localcall.com #  externalName: api.plos.org , naver.com
+  externalName: app2.localcall.com #  externalName: api.plos.org , naver.com
   ports:
   - name: http
     port: 80

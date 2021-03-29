@@ -49,7 +49,13 @@ $ sudo yum install nginx -y
 #     }
 #
 ## ---------- nginx 사용법 
-# a. config 오류 점검  :  nginx -c  ./nginx-ext.conf  -t
+# a. config 오류 점검  :  nginx -c  $PWD/nginx-ext.conf  -t
 # b. terminal에서 실행 :  nginx                  => default config : /etc/nginx/nginx.conf 
-#                         nginx -c ./new.conf    => configure file을 입력으로 주기
+#                         nginx -c $PWD/new.conf    => configure file을 입력으로 주기
 
+# c. ex : sudo nginx -c $PWD/nginx-ext.conf
+#         < proxy 서버를 설치한 EC2에서 실행 >
+#         < stop -> start시 S3에서 nginx config 가져와서 systemctl 서비스 등록하는 방법 준비 필요 >
+#         < 동일port는 먼저 만나는 server 혹은 default server로 등록된 것에서 처리가 되기 때문에,
+#           다른 server_name으로 구분해서 proxy 처리하고자 하는 경우는 listen port를 달리 등록필요>
+#
