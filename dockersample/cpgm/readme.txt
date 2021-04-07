@@ -16,10 +16,11 @@
    )
 4. sudo docker build --tag cpgm-hello:1.0 .
 5. sudo docker images
-6. sudo docker run cpgm-hello:1.0  # 백그라운드 수행은 sudo docker run -d cpgm-hello:1.0
-      # 정상이면, output 출력 확인
+6. sudo docker run --name hello cpgm-hello:1.0  
+      # 실행이정상이면, output 출력 확인
    => Hello World! - 4/7 15:48:13
       Hello World! - 4/7 15:48:15
+   # 백그라운드 수행은 sudo docker run -d --name hello cpgm-hello:1.0
 
 ## operation
  sudo docker ps
