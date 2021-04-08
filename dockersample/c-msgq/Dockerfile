@@ -10,6 +10,8 @@ RUN  ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 RUN  yum install -y gcc
 
 # program binary copy
-COPY hello.out /
+COPY msgqsnd /var/tmp
+COPY msgqrcv /var/tmp
+COPY msgtest.sh /var/tmp
 
-ENTRYPOINT ["/hello.out"]
+ENTRYPOINT ["/var/tmp/msgtest.sh"]

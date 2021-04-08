@@ -25,6 +25,9 @@
 ## operation
  sudo docker ps
  sudo docker container logs -f <CONTAINER ID>  # log 추적기능
- sudo docker container stop <CONTAINER ID> # container 삭제하기
+ sudo docker container stop <CONTAINER ID> # container 중지하기
+ sudo docker container start <CONTAINER ID> # container 재시작하기
+ sudo docker container rm <CONTAINER ID> # container 삭제하기
+ sudo docker container rm <CONTAINER NAME> # container 삭제하기
  sudo docker rmi -f <CONTAINER ID>  # image 강제 삭제할 경우
 
