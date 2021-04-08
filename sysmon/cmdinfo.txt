@@ -1,0 +1,59 @@
+# 참고 URL : https://linoxide.com/10-tools-monitor-cpu-performance-usage-linux-command-line/
+# Be sure to read man pages for each of them, as it also documents the usages in detail. Remember that using these tools also takes a CPU slice. For example, top takes 3%-4% of CPU while glances take 15% to 20% of CPU. So while using any one of these, you need to consider this aspect as well. 
+
+----------
+----------
+
+1. top
+   - The top command displays real-time view of performance-related data of all running processes in a system.
+   # top
+   To modify the output of top command, press:
+    'P' to sort by CPU usage.
+    'I' to remove the idle processes from the display and to revert back press 'I' again.
+    'M' to sort the data by memory usage.
+    'S' to sort by how long the processes have been running type.
+    'P' to sort by CPU usage.
+    'U' to view processes owned by a specific user.
+    'K' to kill processes.
+    'R' to renice processes.
+
+2. iostat
+   - The iostat command list CPU utilization, device utilization and network file system utilization. This utility display system’s average CPU utilization since the last reboot.
+   # iostat -tc 5 2
+
+3. vmstat
+   - The vmstat command will display statistics about system processes, memory, swap, I/O, and the CPU performance. For displaying statistics, the data is collected from the last time the command was run to the present. In case the command never being run, the data will be from the last reboot to the current time.
+   # vmstat 5
+
+4. mpstat
+   - Mpstat is part of the sysstat package in Linux. The mpstat command writes to standard output about activities for each available processor, processor 0 being the first one. If no activity has been selected, then the default report is the CPU utilization report.
+   # mpstat -P ALL 2 4
+
+5. sar
+   - The sar is a performance monitoring tool for collecting, viewing and recording performance data and can list what a system is doing all the time. Sar command can generate report and email them to system admin. The statistics reported by sar include I/O transfer rates, paging activity, process-related activities, interrupts, network activity, memory and swap space utilization, CPU utilization, kernel activities and TTY statistics, among others. Run sar without any option and check the output. The default output list statistics for every 10 minutes and a final average.
+   # sar -P ALL 2 3
+
+6. corefreq
+7. htop
+8. nmon
+9. glances
+10. cpustat
+11. perf
+    - Perf can measure CPU performance counters, tracepoints, kprobes, and uprobes that is included in the Linux kernel, under tools/perf. perf began as a tool for using the performance counters subsystem in Linux, and has had various enhancements to add tracing capabilities. The perf tools are integrated into the Linux kernel since the 2.6 version and are based on the perf events subsystem. The perf profiler uses hardware counters to profile the application. The result of this profiler is explicit and fast. The perf utility can be found in the linux-tools package.
+    # perf stat -a --sleep 10
+12. tiptop
+13. ps
+    - We can use ps command to find cpu usage for each process or users. 
+    + To display the highest CPU & Memory utilization by processes run by root.
+    # ps u | sort -k 1 -r | head -5
+    + Run the following command to display CPU usage for the specific command:
+    # ps -eo pcpu,args | sort -k 1 -r | head -8
+    + To show processes for all users and not attached to a terminal in full format listing with a sort
+    # ps -auxf | sort -nr -k 3 | head -10
+14. dstat
+    - dstat command is a versatile tool for generating system resource statistics and it would also show cpu stats.
+    + You need to install it in order to use it
+    # yum install -y dstat
+    # dstat -c --top-cpu -dn --top-mem
+
+
