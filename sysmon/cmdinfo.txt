@@ -56,4 +56,12 @@
     # yum install -y dstat
     # dstat -c --top-cpu -dn --top-mem
 
-
+15. cat /proc/ 내의 파일 정보 확인
+    # cat /proc/cpuinfo
+       - processor   : CPU 전체 갯수
+       - physical id : 물리 CPU 수 ( CPU 칩 1개당 physical id 1개 부여됨, 0,1,2,...  )
+       - cpu cores   : CPU당 물리코어 수 ( CPU 칩 1개가 가지고 있는 core 수 )
+       - siblings    : sibling 값이 CPU core 수의 2배면 하이퍼스레딩이 적용된 것,
+                       CPU core 수와 동일하면 하이퍼스레딩이 미적용된 것 
+       - model name  : CPU 모델 확인
+    # cat /proc/meminfo
