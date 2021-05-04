@@ -3,6 +3,8 @@
    system status docker
    => inactive 이면 systemctl start docker
 1. docker login
+   #docker 프로세스가 push/pull을 docker hub repository에 접근 권한 부여하기
+
 2. msq 프로그램 컴파일 테스트: gcc msgqrcv.c -o /var/tmp/msgqrcv, gcc msgqsnd.c -o /var/tmp/msgqsnd
                            msgtest.sh 내의 경로는 Docker 내의 복사경로 고려해서 작성
 3. Dockerfile 점검 
@@ -29,4 +31,18 @@
  sudo docker container rm <CONTAINER NAME> # container 삭제하기
  sudo docker rmi -f <CONTAINER ID>  # image 강제 삭제할 경우
  sudo docker exec -it <CONTAINER NAME> /bin/sh #container 에 접속
+
+++++++++++
+0. 참고 : https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html
+
+1. docker 프로세스가 push/pull을 ECR repository에 접근 권한 부여하기
+   # ecr repository login 권한 획득
+   # aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.region.amazonaws.com
+   # aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 592806604814.dkr.ecr.us-west-1.amazonaws.com
+
+2. docker image를 ecr 저장소로 보내기위한 tag 설정
+ sudo docker tag cpgm-msgqueue:1.0 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-cpgm-msgqueue:1.0
+
+3. docker image를 ecr 저장소로 push 하기
+ sudo docker push 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-cpgm-msgqueue:1.0
 

@@ -1,0 +1,7 @@
+FROM centos:latest
+MAINTAINER Sang Kyeong Kim 
+
+COPY step3-cdrpersistence.sh  /
+RUN  chmod 755 /step3-cdrpersistence.sh
+
+ENTRYPOINT ["/step3-cdrpersistence.sh"] 

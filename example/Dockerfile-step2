@@ -1,0 +1,7 @@
+FROM centos:latest
+MAINTAINER Sang Kyeong Kim 
+
+COPY step2-rating.sh  /
+RUN  chmod 755 /step2-rating.sh
+
+ENTRYPOINT ["/step2-rating.sh"] 

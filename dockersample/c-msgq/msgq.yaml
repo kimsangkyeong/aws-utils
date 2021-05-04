@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: msgq
+    labels:
+        app: cpgm-msgq
+spec:
+    containers:
+    - image: 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-cpgm-msgqueue:1.0
+      name: msgq
+      imagePullPolicy: IfNotPresent
+    restartPolicy: Always
