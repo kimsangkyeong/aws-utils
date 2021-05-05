@@ -2,11 +2,13 @@
 # aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.region.amazonaws.com
 
 # step1 input : JOB_DATA : systemA-input
-docker build -f Dockerfile-step1 --tag 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-accountinfo:1.0 .
-docker push 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-accountinfo:1.0
+docker build -f Dockerfile-step1 --tag 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-accountinfo:1.1 .
+docker push 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-accountinfo:1.1
 
-# step2 input : JOB_DATA : systemA-input_B
+# step2 input : JOB_DATA : systemA-input
 docker build -f Dockerfile-step2 --tag 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-rating:1.0 .
 docker push 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-rating:1.0
 
-# step3 input : JOB_DATA : systemA-input_B_C
+# step3 input : JOB_DATA : systemA-input
+docker build -f Dockerfile-step3 --tag 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-cdrpersistence:1.0 .
+docker push 592806604814.dkr.ecr.us-west-1.amazonaws.com/ds07297-cdrpersistence:1.0

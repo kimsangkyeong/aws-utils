@@ -14,17 +14,18 @@ echo "# ls -alF /data "
 ls -alF /data
 echo "--------"
 echo "environment - JOB_DATA : ${JOB_DATA}"
-echo "step3 end process : $0 " > ${INPUT_PATH}/${JOB_DATA}
+echo "=> step3 end process: $0 , ls -alF ${INPUT_PATH}/${JOB_DATA}" 
+ls -alF ${INPUT_PATH}/${JOB_DATA}
+
 mkdir -p ${OUTPUT_PATH} 2> /dev/null
-echo "$0 : success" > ${OUTPUT_PATH}/${JOB_DATA}.result
+echo "$0 end process" 
+echo " mv ${INPUT_PATH}/${JOB_DATA} ${OUTPUT_PATH}/${JOB_DATA} "
+mv ${INPUT_PATH}/${JOB_DATA} ${OUTPUT_PATH}/${JOB_DATA}
+
 echo "--------"
 echo "# ls -al ${INPUT_PATH} "
 ls -al ${INPUT_PATH}
-echo "# cat  ${INPUT_PATH}/${JOB_DATA}"
-cat  ${INPUT_PATH}/${JOB_DATA}
 echo "# ls -al ${OUTPUT_PATH}"
 ls -al ${OUTPUT_PATH}
-echo "# cat ${OUTPUT_PATH}/${JOB_DATA}.result "
-cat ${OUTPUT_PATH}/${JOB_DATA}.result
 echo "########"
 
