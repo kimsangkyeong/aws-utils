@@ -1,0 +1,92 @@
+{
+  "Comment": "tomars ksk scenario - first process accountinfo",
+  "StartAt": "ChoiceState : Runtime Env",
+  "States": {
+    "ChoiceState : Runtime Env": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.RunEnvironment",
+          "StringEquals": "fargate",
+          "Next": "ksk-scenario-accountinfo batch fargate"
+        },
+        {
+          "Variable": "$.RunEnvironment",
+          "StringEquals": "ec2",
+          "Next": "ksk-scenario-accountinfo batch ec2"
+        }
+      ],
+      "Default": "Error: Not Setting RunEnvironment "
+    },
+    "ksk-scenario-accountinfo batch fargate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::batch:submitJob.sync",
+      "Parameters": {
+        "JobDefinition": "arn:aws:batch:ap-northeast-2:091262214952:job-definition/ksk-scenario-accountinfo-fargate:5",
+        "JobName": "ksk-scenario-accountinfo-fargate",
+        "JobQueue": "arn:aws:batch:ap-northeast-2:091262214952:job-queue/ksk-scenario-fargate-jobqueue",
+        "ContainerOverrides": {
+          "Environment": [
+            {
+              "Name": "JOB_DATA",
+              "Value.$": "$.InputFileName"
+            }
+          ]
+        }
+      },
+      "Next": "ksk-scenario-accountinfo",
+      "TimeoutSeconds": 3600,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ksk-scenario-accountinfo"
+        }
+      ]
+    },
+    "ksk-scenario-accountinfo batch ec2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::batch:submitJob.sync",
+      "Parameters": {
+        "JobDefinition": "arn:aws:batch:ap-northeast-2:091262214952:job-definition/ksk-scenario-accountinfo-ec2:3",
+        "JobName": "ksk-scenario-accountinfo-ec2",
+        "JobQueue": "arn:aws:batch:ap-northeast-2:091262214952:job-queue/ksk-scenario-ec2-jobqueue",
+        "ContainerOverrides": {
+          "Environment": [
+            {
+              "Name": "JOB_DATA",
+              "Value.$": "$.InputFileName"
+            }
+          ]
+        }
+      },
+      "Next": "ksk-scenario-accountinfo",
+      "TimeoutSeconds": 3600,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ksk-scenario-accountinfo"
+        }
+      ]
+    },
+    "ksk-scenario-accountinfo": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:ap-northeast-2:091262214952:function:ksk-scenario-accountinfo:$LATEST",
+        "Payload": {
+          "InputFileName.$": "$.Container.Environment[0].Value",
+          "accountinfoBatchResult.$": "$.Status"
+        }
+      },
+      "End": true
+    },
+    "Error: Not Setting RunEnvironment ": {
+      "Type": "Fail",
+      "Cause": "No Matches!"
+    }
+  }
+}

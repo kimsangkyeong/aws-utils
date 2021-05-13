@@ -1,0 +1,7 @@
+FROM centos:latest
+MAINTAINER Sang Kyeong Kim 
+
+COPY step1-accountinfo.sh  /
+RUN  chmod 755 /step1-accountinfo.sh
+
+ENTRYPOINT ["/step1-accountinfo.sh"] 
