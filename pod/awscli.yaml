@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: awscli
+    labels:
+        app: awstool
+spec:
+    containers:
+    - image: purecap/awscli:1.0
+      name: awscli
+      command:
+          - sleep
+          - "3600"
+      imagePullPolicy: IfNotPresent

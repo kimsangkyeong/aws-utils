@@ -7,7 +7,7 @@ CLUSTER_VPC_NAME="ds07297-d-vpc"               # 존재하는 VPC의 ID를 얻�
 CLUSTER_NODESNET_KEYWORD="-dataplane-"      # 1. Dual Cidr EKS용 VPC의 CF로 만들어 지면 사전 예약어로 사용하고 있어서 Tag Name에 포함된 문자열을 기준으로 조회함.
 CLUSTER_REGION="us-west-1"
 CLUSTER_TAGS="{ Env: develop, Operator: admin, Project: ds07297 }"
-CLUSTER_KUBERNETES_VERSION='"1.18"'
+CLUSTER_KUBERNETES_VERSION='"1.19"'
 
 # 1. subnet id 얻어오기
 # 1-1. vpc id 얻어오기
@@ -122,7 +122,7 @@ managedNodeGroups:
       /etc/eks/bootstrap.sh ${CLUSTER_NAME} --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup-image=ami-0ee5bb0be5fd09f21'
 EOF
 
-#eksctl create nodegroup --config-file= $CLUSTER_NAME"-managed-nodegroups.yaml"
+#eksctl create nodegroup --config-file $CLUSTER_NAME"-managed-nodegroups.yaml" 
 
 # eksctl parameter 생성
 eksctl create nodegroup \

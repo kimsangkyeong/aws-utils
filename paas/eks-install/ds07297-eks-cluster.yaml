@@ -1,0 +1,25 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: ds07297-eks
+  region: us-west-1
+  version: "1.19"
+  tags: { Env: develop, Operator: admin, Project: ds07297 }
+kubernetesNetworkConfig:
+  serviceIPv4CIDR: 10.2.128.0/17
+vpc:
+  id: vpc-09fece008f04ad765
+  subnets:
+    public:
+      us-west-1b:
+          id: subnet-0a41aa9b13ecc4cac
+      us-west-1c:
+          id: subnet-06093f279c3d2f91b
+    private:
+      us-west-1b:
+          id: subnet-081b09980d8064d9e
+      us-west-1c:
+          id: subnet-07f34318d85ec1661
+  clusterEndpoints:
+      privateAccess: true
+      publicAccess: true

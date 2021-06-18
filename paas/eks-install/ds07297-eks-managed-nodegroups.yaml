@@ -1,0 +1,23 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+    name: ds07297-eks
+    region: us-west-1
+managedNodeGroups:
+  - name: mngrp-fe
+    ami: "ami-0ee5bb0be5fd09f21"
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 5
+    volumeSize: 20
+    labels: { node.role: fe, env: develop }
+    tags: { Creater: ds07297, Env: develop, Operator: admin }
+    instanceType: "t3.large"
+#    maxPodsPerNode: 50
+    privateNetworking: true
+    ssh:
+      allow: true
+      publicKeyName: ds07297-kpair
+    overrideBootstrapCommand: |
+      #!/bin/bash
+      /etc/eks/bootstrap.sh ds07297-eks --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup-image=ami-0ee5bb0be5fd09f21'
