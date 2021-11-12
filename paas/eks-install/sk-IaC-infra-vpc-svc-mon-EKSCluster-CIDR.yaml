@@ -1,0 +1,221 @@
+---
+########################################################################################################
+# Templatename : sk-IaC-infra-vpc-svc-mon-EKSCluster-CIDR.yaml
+# Purpose : Cloudformation for service configuration of SK IaC standard infrastructure
+#           Static resource configuration of business service units based on parent stack (initail configuration)
+#           Reference Architecture : EKS Type 1 ( 1 vpc Overlay Cidr for Another Pod network ip pool )
+# ------------------------------------------------------------------------------------------------------
+#  version :     date      :    developer      :  reason
+#  -------   -------------   -----------------   -------------------------------------------------------
+#   1.0        2021.2.25    kim sang kyeong      first created
+#
+########################################################################################################
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+   'Cloudformation for service configuration of SK IaC standard infrastructure. (Reference Architecture : EKS Type 1)'
+
+#----------------------[[ Metadata ]]-------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Set service network information for infrastructure configuration."
+        Parameters:
+          - ParentVpcStack
+          - StackCreater
+          - SVCDataPlanePrivateSubnet1Block
+          - SVCDataPlanePrivateSubnet2Block
+          
+#----------------------[[ Parameters ]]-------------
+Parameters:
+# >>>>  Project Info Start    
+  ParentVpcStack:
+    Description: 'Enter the stack name created by Cloudformation for initial configuration among SK IaC standard infrastructure.'
+    Type: String
+
+  StackCreater:
+    Description: 'Enter your IAM User Name.'
+    Type: String
+    Default: your-iamuserid
+
+  OpsGroup:
+    Description: 'Enter Operation Group.'
+    Type: String
+    Default: infra-group
+
+#  Project Info End  <<<<<    
+
+# >>>> Subnet Info Start    
+
+########## Public Network ###############
+
+## Service Zone
+  
+########## Public Network ###############
+  
+########## Private Network ###############    
+      
+## Service Zone
+  SVCDataPlanePrivateSubnet1Block:
+    Type: String
+    Default: 100.64.22.0/24
+    Description: CidrBlock for service-dataplane-private-[p/d]-subnet1 within the VPC
+
+  SVCDataPlanePrivateSubnet2Block:
+    Type: String
+    Default: 100.64.23.0/24
+    Description: CidrBlock for service-dataplane-private-[p/d]-subnet2 within the VPC
+
+   
+#  Subnet Info End  <<<<<            
+              
+#----------------------[[ Conditions ]]-------------
+Conditions:
+  InUSEast1:
+    Fn::Equals: 
+      - Ref: AWS::Region
+      - 'us-west-1'
+#----------------------[[ Mappings ]]-------------
+Mappings:
+  # for environment abbr
+  EnvMap:
+    develop: 
+      abbr: '-d'
+    product:
+      abbr: '-p'
+
+#----------------------[[ Resources ]]-------------
+Resources:
+
+## Subnet   
+
+### public 
+
+## Service zone
+
+
+### private
+          
+## Service Zone
+  SVCDataPlanePrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-dataplane1-private-[p/d]-subnet1
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '0'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCDataPlanePrivateSubnet1Block
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-dataplane1-private'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet1' 
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creater
+        Value: !Sub '${StackCreater}'      
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Purpose
+        Value: 'service for dataplane1 in (us-west-1a)'  
+      - Key: 'kubernetes.io/role/internal-elb'
+        Value: 1     
+
+  SVCDataPlanePrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCDataPlanePrivateSubnet1
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route1'}
+      
+  SVCDataPlanePrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-dataplane1-private-p-subnet2
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '1'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCDataPlanePrivateSubnet2Block
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-dataplane1-private'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet2' 
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creater
+        Value: !Sub '${StackCreater}'      
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Purpose
+        Value: 'service for dataplane1 in (us-west-1b)'  
+      - Key: 'kubernetes.io/role/internal-elb'
+        Value: 1     
+        
+  SVCDataPlanePrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCDataPlanePrivateSubnet2
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route2'}
+
+
+
+#----------------------[[ Outputs ]]-------------
+Outputs:
+  Templatename:
+    Description: 'Cloudformation for service configuration of SK IaC standard infrastructure.'
+    Value: 'sk-IaC-infra-vpc-svc-mon-EKSCluster-CIDR.yaml'
+    
+  TemplateVersion:
+    Description: 'sk-IaC-infra-vpc-svc-mon-EKSCluster-CIDR.yaml version.'
+    Value: '1.0'
+    
+  stackname:
+    Description: 'Service EKS type 1 Stack name.'
+    Value: !Sub '${AWS::StackName}'
+    
+  projectname:
+    Description: 'project name.'
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-projectname'
+      
+  environment:
+    Description: Environment
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-environment'
+
+  environmentabbr:
+    Description: 'Environment Abbr'
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-environment-abbr'      
+
+  skIaCVpcId:
+    Description: The VPC Id
+    Value:  {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-vpc'
