@@ -58,3 +58,26 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 EOF
 sudo yum install -y kubectl
 
+#### 다. kubectl convert 플러그인 설치하기 - https://kubernetes.io/ko/docs/tasks/tools/install-kubectl-linux/
+
+# 목적 : 특정버번의 쿠버네티스 API로 작성된 매니페스트를 다른 버전으로 변환할 수 있도록 지원
+         매니페스트를 최신 쿠버네티스 릴리스의 사용 중단되지 않은 API로 마이그레이션하는데
+         특히 유용하다.
+
+1) 다음 명령으로 최신 릴리스를 다운로드하기 ( curl CLI 호출시는 -k 추가 )
+curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl-convert
+
+2) 바이너리 검증하기
+curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl-convert.sha256"
+
+echo "$(<kubectl-convert.sha256) kubectl-convert" | sha256sum --check
+    .검증이 성공하면:  kubectl-convert: OK
+    .검증이 실패하면:  kubectl-convert: FAILED
+
+3) kubectl-convet를 root 권한으로 설치하기
+sudo install -o root -g root -m 0755 kubectl-convert /usr/local/bin/kubectl-convert
+
+4) 플러그인이 정상적으로 설치되었는지 확인하기
+kubectl convert --help
+
+
