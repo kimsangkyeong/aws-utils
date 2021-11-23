@@ -1,0 +1,13 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: ds07297-eks
+  region: us-west-1
+  version: "1.19"
+
+iam:
+  withOIDC: true
+
+addons:
+- name: vpc-cni
+  version: 1.7.5 # optional
