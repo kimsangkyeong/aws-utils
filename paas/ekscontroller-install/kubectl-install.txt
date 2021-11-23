@@ -1,0 +1,60 @@
+#### 관련 URL : kubernetes.io ###
+
+0. 설치 및 설정자료 : https://kubernetes.io/ko/docs/tasks/tools/install-kubectl-linux/
+
+#### 가. 직접 설치하기
+
+1. 설치하기 ( curl을 서버에서 cli로 호출하면 SSL 오루 발생, 이때는 -k option 추가 )
+
+## 바이너리 최신버전 다운로드
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+-특정버전을 다운로드 하려면, $(curl -L -s https://dl.k8s.io/release/stable.txt)을 버전정보로 바꾼다.
+  ex) curl -LO https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl
+   
+## 다운로드 받은 바이너리를 검증한다.
+
+1) kubectl 체크섬파일을 다운로드한다.
+curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+2) kubectl 바이너리를 체크섬파일을 통해 검증한다.
+echo "$(<kubectl.sha256) kubectl" | sha256sum --check
+  ** 검증 성공시 - kubectl: OK
+  ** 검증 실패시 - kuvectl: FAILED
+
+2. kubectl Path 추가
+
+2-1) 시스템에 root 접근권한을 부여하고자 하는 경우
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+2-2) root 접근권한 없이 local 내에서 사용하고자 하는 경우
+chmod +x kubectl
+mkdir -p ~/.local/bin/kubectl
+mv ./kubectl ~/.local/bin/kubectl
+# 그리고 ~/.local/bin/kubectl을 $PATH에 추가
+
+3. kubectl 버전 확인하기
+kubectl version --client
+
+4. Shell Completion 설정하기 - https://kubernetes.io/ko/docs/tasks/tools/install-kubectl-linux/
+1) 자동완성 스크립트를 ~/.bashrc에 등록한다.
+# User specific aliases and functions
+source <(kubectl completion bash)
+alias k=kubectl
+complete -F __start_kubectl k
+
+2) 자동완성 스크립트를 /etc/bash_completion.d 디렉토리에 추가한다.
+kubectl completion bash >/etc/bash_completion.d/kubectl
+
+#### 나. 기본 패키지 관리도구를 사용하여 설치하기
+
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+sudo yum install -y kubectl
+

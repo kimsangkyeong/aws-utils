@@ -1,0 +1,17 @@
+#### 관련 URL : eksctl.io ###
+
+0. repository  : https://github.com/weaveworks/eksctl
+
+1. 설치하기
+
+## 바이너리 최신버전 다운로드 및 압축 해제
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+## 실행파일 /usr/local/vin path로 이동
+sudo mv /tmp/eksctl /usr/local/bin
+
+2. Shell Completion : 참고 URL - https://eksctl.io/introduction/#features
+
+. <(eksctl completion bash)
+
+
