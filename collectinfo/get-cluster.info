@@ -1,0 +1,66 @@
+# kubernetes 자동완성 환경
+yum install bash-completion
+echo 'source <(kubectl completion bash)' >>~/.bashrc
+kubectl completion bash > /etc/bash_completion.d/kubectl
+## kubectl alias가 설정되어 있는 경우 alias로 셸 자동완성 확장하기
+echo 'alias k=kubectl' >>~/.bashrc
+echo 'complete -F __start_kubectl k' >>~/.bashrc
+## 환경 reload
+source ~/.bashrc
+
+# 임시 환경설정
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_SESSION_TOKEN=
+export AWS_DEFAULT_REGION=ap-northeast-2
+
+# kubeconfig 설정하기
+aws sts get-caller-identity
+aws eks --region <region-code> update-kubeconfig --name <cluster_name>
+
+# 기존 설정되어 있는 context 및 cluster 조회하기
+kubectl config get-clusters
+kubectl config get-contexts
+kubectl config rename-context old-name new-name   # 긴 context 이름을 짧게 재 설정
+kubectl config use-context <context name>
+
+# kubectl 정보 조회하기 : api-resouces, options, namespace
+kubectl api-resources
+kubectl options
+kubectl get ns
+
+# eks nodegroup 정보 조회하기
+eksctl get nodegroup --cluster  <cluster name > --region <region>
+
+# CRD(Custom Resource Definition) 정보 조회하기
+kubectl get crd
+kubectl get targetgroupbindings -A
+
+# ingress 정보 조회하기
+kubectl describe ingress <ingress name> -n <namespace>
+  # rule 정보 확인
+  # Annotations:
+  #   kubernetes.io/ingress.class: alb
+  #   alb.ingress.kubernetes.io/group.name:
+  #   alb.ingress.kubernetes.io/scheme: internet-facing
+  #   alb.ingress.kubernetes.io/target-type: ip
+  #   istio-app-ingressgateway:80
+  #   alb.ingress.kubernetes.io/inbound-cidrs: xx.xx.xx.xx/xx
+
+# awsloadbalancercontroller 정보 조회하기
+kubectl get pod -n kube-system 
+kubectl describe pod aws-load-balancer-controller-xxxxx -n kube-system
+
+# configmap, secrets 조회하기
+kubectl get configmap -A
+kubectl get secrets -A
+
+# Storage Class 조회하기
+kubectl get sc 
+
+# horizontalpodautoscalers (hpa)
+kubectl get hpa -A
+
+# istio 적용된 환경 확인 ( namespace에 istio-injection=enabled )
+kubectl get ns --show-labels
+

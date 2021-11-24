@@ -1,3 +1,4 @@
+## awsloadbalancer controller 설치하기 : kubernetes 1.19이상부터 브랜드 변경됨.
 #=== URL : https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
 
 # 1. Download an IAM policy for the AWS Load Balancer Controller that allows it to make calls to AWS APIs on your behalf.
@@ -12,8 +13,10 @@ aws iam create-policy \
 
 # 3. Create an IAM role and annotate the Kubernetes service account named aws-load-balancer-controller in the kube-system namespace for the AWS Load Balancer Controller using eksctl or the AWS Management Console and kubectl.
 
-eksctl utils associate-iam-oidc-provider --region=us-west-1 --cluster=ds07297-eks --approve
+## kubernetes service account에IAM 권한 부여를 하는 것으로 OIDC 설정이 안되어 있으면 수행
+eksctl utils associate-iam-oidc-provider --cluster=ds07297-eks --approve
 
+## service account 생성 후 policy 부여
 eksctl create iamserviceaccount \
   --cluster=ds07297-eks \
   --namespace=kube-system \
@@ -35,7 +38,10 @@ kubectl get deployment -n kube-system alb-ingress-controller
 
   # 5-2. install awsloadbalancercontroller by helm
 
+## TargetGroupBinding 사용자 지정 리소스를 설치한다.
 kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
+
+## Helm repository 설치 및 awsloadbalancercontroller install
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
@@ -47,4 +53,8 @@ kubectl get deployment -n kube-system aws-load-balancer-controller
 
 # 6. elb 권한 설정
 
-aws iam get-role --role-name "AWSServiceRoleForElasticLoadBalancing" || aws iam create-service-linked-role --aws-service-name "elasticloadbalancing.amazonaws.com"
+## 서비스 연결 역할 만들기
+aws iam create-service-linked-role --aws-service-name "elasticloadbalancing.amazonaws.com"
+
+## role 정보 조회
+aws iam get-role --role-name "AWSServiceRoleForElasticLoadBalancing" 
