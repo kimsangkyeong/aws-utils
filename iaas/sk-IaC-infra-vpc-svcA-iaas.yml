@@ -1,0 +1,394 @@
+---
+########################################################################################################
+# Templatename : sk-IaC-infra-vpc-svcA-iaas.yaml
+# Purpose : Cloudformation for service configuration of SK IaC standard infrastructure
+#           Static resource configuration of business service units based on parent stack (initial configuration)
+#           Reference Architecture : Service Type A ( xxxxxxxx.jpg )
+# ------------------------------------------------------------------------------------------------------
+#  version :     date      :    developer      :  reason
+#  -------   -------------   -----------------   -------------------------------------------------------
+#   1.0        2020.3.20    kim sang kyeong      first created
+#
+########################################################################################################
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+   'Cloudformation for service configuration of SK IaC standard infrastructure. (Reference Architecture : Service Type A)'
+
+#----------------------[[ Metadata ]]-------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Set service network information for infrastructure configuration."
+        Parameters:
+          - ParentVpcStack
+          - StackCreator
+          - SVCBastionPublicSubnet1Block
+          - SVCLoadBalancePublicSubnet1Block
+          - SVCLoadBalancePublicSubnet2Block          
+          - SVCAppDBPrivateSubnet1Block
+          - SVCAppDBPrivateSubnet2Block
+          
+#----------------------[[ Parameters ]]-------------
+Parameters:
+# >>>>  Project Info Start    
+  ParentVpcStack:
+    Description: 'Enter the stack name created by Cloudformation for initial configuration among SK IaC standard infrastructure.'
+    Type: String
+
+  StackCreator:
+    Description: 'Enter your id.'
+    Type: String
+    Default: ca07297
+    
+#  Project Info End  <<<<<    
+
+# >>>> Subnet Info Start    
+
+########## Public Network ###############
+
+## Service Zone
+  SVCBastionPublicSubnet1Block:
+    Type: String
+    Default: 10.16.1.0/24
+    Description: CidrBlock for service-bastion-[p/d]-subnet1 within the VPC
+
+  SVCLoadBalancePublicSubnet1Block:
+    Type: String
+    Default: 10.16.2.0/24
+    Description: CidrBlock for service-loadbalance-[p/d]-subnet1 within the VPC
+
+  SVCLoadBalancePublicSubnet2Block:
+    Type: String
+    Default: 10.16.129.0/24
+    Description: CidrBlock for service-loadbalance-public-[p/d]-subnet2 within the VPC
+  
+########## Public Network ###############
+  
+########## Private Network ###############    
+      
+## Service Zone
+  SVCAppDBPrivateSubnet1Block:
+    Type: String
+    Default: 10.16.3.0/24
+    Description: CidrBlock for service-appdb-[p/d]-subnet1 within the VPC
+
+  SVCAppDBPrivateSubnet2Block:
+    Type: String
+    Default: 10.16.130.0/24
+    Description: CidrBlock for service-appdb-public-[p/d]-subnet2 within the VPC
+
+    
+#  Subnet Info End  <<<<<            
+              
+#----------------------[[ Conditions ]]-------------
+Conditions:
+  InNorthEast2:
+    Fn::Equals: 
+      - Ref: AWS::Region
+      - 'ap-northeast-2'
+#----------------------[[ Mappings ]]-------------
+Mappings:
+  # for environment abbr
+  EnvMap:
+    develop: 
+      abbr: '-d'
+    product:
+      abbr: '-p'
+
+#----------------------[[ Resources ]]-------------
+Resources:
+
+## Subnet   
+
+### public 
+
+## Service zone
+  SVCBastionPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-bastion-public-[p/d]-subnet1
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '0'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCBastionPublicSubnet1Block
+      MapPublicIpOnLaunch: false 
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-bastion-public'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet1'  
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Zone
+        Value: 'service zone'   
+      - Key: Creator
+        Value: !Sub '${StackCreator}' 
+      - Key: Purpose
+        Value: 'service for loadbalancer in (ap-northeast-2a)'
+
+  SVCBastionPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCBastionPublicSubnet1
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route'}
+
+  SVCLoadBalancePublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-loadbalance-public-[p/d]-subnet1
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '0'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCLoadBalancePublicSubnet1Block
+      MapPublicIpOnLaunch: false 
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-loadbalance-public'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet1'  
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Zone
+        Value: 'service zone'   
+      - Key: Creator
+        Value: !Sub '${StackCreator}' 
+      - Key: Purpose
+        Value: 'service for loadbalancer in (ap-northeast-2a)'
+
+  SVCLoadBalancePublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCLoadBalancePublicSubnet1
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route'}
+      
+  SVCLoadBalancePublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-loadbalance-public-[p/d]-subnet2
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '2'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCLoadBalancePublicSubnet2Block
+      MapPublicIpOnLaunch: false 
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-loadbalance-public'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet2'  
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Zone
+        Value: 'service zone'   
+      - Key: Creator
+        Value: !Sub '${StackCreator}'    
+      - Key: Purpose
+        Value: 'service for loadbalancer in (ap-northeast-2c)'    
+        
+  SVCLoadBalancePublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCLoadBalancePublicSubnet2
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route'}  
+
+
+### private
+          
+## Service Zone
+  SVCAppDBPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-appdb-private-[p/d]-subnet1
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '0'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCAppDBPrivateSubnet1Block
+      MapPublicIpOnLaunch: false 
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-appdb-private'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet1'  
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Zone
+        Value: 'service zone'   
+      - Key: Creator
+        Value: !Sub '${StackCreator}' 
+      - Key: Purpose
+        Value: 'service for appdb in (ap-northeast-2a)'
+
+  SVCAppDBPrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCAppDBPrivateSubnet1
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route1'}
+      
+  SVCAppDBPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: service-appdb-private-[p/d]-subnet2
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '2'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SVCAppDBPrivateSubnet2Block
+      MapPublicIpOnLaunch: false 
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - 'service-appdb-private'
+            - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+            - '-subnet2'  
+      - Key: Project
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+      - Key: Env
+        Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+      - Key: Zone
+        Value: 'service zone'   
+      - Key: Creator
+        Value: !Sub '${StackCreator}'    
+      - Key: Purpose
+        Value: 'service for appdb in (ap-northeast-2c)'    
+        
+  SVCAppDBPrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SVCAppDBPrivateSubnet2
+      RouteTableId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-route2'}  
+
+## Security Group     
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion server security group
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - ''
+            - - {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+              - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+              - '-bastion-sg'     
+        - Key: Project
+          Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+        - Key: Env
+          Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+        - Key: Zone
+          Value: 'service zone'   
+        - Key: Creator
+          Value: !Sub '${StackCreator}'   
+        - Key: Purpose
+          Value: 'bastion server for operation '     
+
+  LoadBalanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Loadbalance security group
+      VpcId: {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'}
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - ''
+            - - {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+              - {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'}
+              - '-loadbalance-sg'     
+        - Key: Project
+          Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+        - Key: Env
+          Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+        - Key: Zone
+          Value: 'service zone'   
+        - Key: Creator
+          Value: !Sub '${StackCreator}'   
+        - Key: Purpose
+          Value: 'loadbalance for k8s ingress-app '               
+
+#----------------------[[ Outputs ]]-------------
+Outputs:
+  Templatename:
+    Description: 'Cloudformation for service configuration of SK IaC standard infrastructure.'
+    Value: 'sk-IaC-infra-vpc-svcA-iaas.yaml'
+    
+  TemplateVersion:
+    Description: 'sk-IaC-infra-vpc-svcA-iaas.yaml version.'
+    Value: '1.0'
+    
+  stackname:
+    Description: 'Service Type A Stack name.'
+    Value: !Sub '${AWS::StackName}'
+    
+  projectname:
+    Description: 'project name.'
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-projectname'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-projectname'
+      
+  environment:
+    Description: Environment
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-environment'
+
+  environmentabbr:
+    Description: 'Environment Abbr'
+    Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment-abbr'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-environment-abbr'      
+
+  skIaCVpcId:
+    Description: The VPC Id
+    Value:  {'Fn::ImportValue': !Sub '${ParentVpcStack}-vpc'} 
+    Export:
+      Name: !Sub '${AWS::StackName}-vpc'
+
+  BastionSecurityGroup:
+    Description: Bastion server security group
+    Value: !Ref BastionSecurityGroup        
+
+  LoadBalanceSecurityGroup:
+    Description: Loadbalance security group
+    Value: !Ref LoadBalanceSecurityGroup        
+    
