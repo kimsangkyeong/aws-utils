@@ -1,0 +1,495 @@
+---
+########################################################################################################
+# Templatename : sk-IaC-infra-vpc-base-EKS-CIDR.yaml
+# Purpose : Cloudformation for initial configuration of SK IaC standard infrastructure
+#           Network basic composition such as VPC among static resources 
+#           Reference Architecture : EKS Type 1 ( 1 vpc Overlay Cidr for Another Pod network ip pool )
+# ------------------------------------------------------------------------------------------------------
+#  version :     date      :    developer      :  reason
+#  -------   -------------   -----------------   -------------------------------------------------------
+#   1.0        2020.12.30    kim sang kyeong      first created
+#
+########################################################################################################
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+   'Cloudformation for initial configuration of SK IaC standard infrastructure (Reference Architecture : EKS Type 1)'
+
+#----------------------[[ Metadata ]]-------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Set Basic Information for Infra Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+          - StackCreator
+          - SKIaCVpcMainBlock
+          - SKIaCNATPublicSubnet1Block
+          - SKIaCNATPublicSubnet2Block
+
+          
+#----------------------[[ Parameters ]]-------------
+Parameters:
+# >>>>  Project Info Start    
+
+  ProjectName:
+    Description: 'Project Business System Abbr. (Please enter an abbreviation).'
+    Type: String
+    Default: ekstst
+
+  Environment:
+    Description: 'Select the Infra environment use you want to configure.'
+    Type: String
+    Default: develop
+    AllowedValues:
+      - develop
+      - product
+     
+  StackCreator:
+    Description: 'Enter your IAM User Name.'
+    Type: String
+    Default: ca07297
+
+  OpsGroup:
+    Description: 'Enter Operation Group.'
+    Type: String
+    Default: infra-group
+
+    
+#  Project Info End  <<<<<    
+
+# >>>> VPC Info Start    
+  SKIaCVpcMainBlock:
+    Type: String
+    Default: 100.64.16.0/20
+    Description: The CIDR range for the VPC. This should be a valid private (RFC 1918 or RFC 6598 - 100.64.xxx.xxx ) CIDR range.
+
+# VPC Info End  <<<<<
+
+# >>>> Subnet Info Start    
+
+########## Public Network ###############
+
+## Service Zone
+  SKIaCNATPublicSubnet1Block:
+    Type: String
+    Default: 100.64.16.0/24
+    Description: CidrBlock for service-nat-public-[p/d]-subnet1 within the VPC
+
+  SKIaCNATPublicSubnet2Block:
+    Type: String
+    Default: 100.64.17.0/24
+    Description: CidrBlock for service-nat-public-[p/d]-subnet2 within the VPC  
+
+########## Public Network ###############
+    
+########## Private Network ###############    
+      
+## Service Zone
+
+    
+#  Subnet Info End  <<<<<            
+              
+#----------------------[[ Conditions ]]-------------
+Conditions:
+  InNorthEast2:
+    Fn::Equals: 
+      - Ref: AWS::Region
+      - 'us-west-1'
+  IsDevelopEnv:
+    Fn::Equals: 
+      - !Sub  '${Environment}'
+      - develop
+  IsProductEnv:
+    Fn::Equals:
+      - !Sub  '${Environment}'
+      - product
+#----------------------[[ Mappings ]]-------------
+Mappings:
+  # for environment abbr
+  EnvMap:
+    develop: 
+      abbr: '-d'
+    product:
+      abbr: '-p'
+
+#----------------------[[ Resources ]]-------------
+Resources:
+
+## VPC - IGW - ROUTER - eip - NAT   
+  skIaCVpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Sub '${SKIaCVpcMainBlock}'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'        
+
+  skIaCVpcIgw:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc-igw'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
+
+  VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref skIaCVpcIgw
+      VpcId: !Ref skIaCVpc        
+
+## public route table
+  skIaCVpcRoute:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref skIaCVpc
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-route'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
+
+  skIaCVpcRouteRoute:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref skIaCVpcRoute
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref skIaCVpcIgw
+
+## nat 
+  skIaCEip1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-eip1'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'  
+      - Key: Purpose
+        Value: !Join 
+          - ''
+          - - 'eip for '
+            - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc-nat1'        
+        
+  skIaCEip2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc 
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-eip2'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'  
+      - Key: Purpose
+        Value: !Join 
+          - ''
+          - - 'eip for '
+            - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc-nat2' 
+              
+###  precondition : public subnet created 
+  skIaCNat1:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt 'skIaCEip1.AllocationId'
+      SubnetId: !Ref SKIaCNATPublicSubnet1
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc-nat1'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
+
+  skIaCNat2:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt 'skIaCEip2.AllocationId'
+      SubnetId: !Ref SKIaCNATPublicSubnet2
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-vpc-nat2'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
+        
+## private route table
+  skIaCVpcRoute1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref skIaCVpc
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-route1'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
+        
+  skIaCVpcRoute1Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref skIaCVpcRoute1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref skIaCNat1
+           
+  skIaCVpcRoute2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref skIaCVpc
+      Tags:
+      - Key: Name
+        Value: !Join 
+          - ''
+          - - !Sub '${ProjectName}'
+            - !FindInMap [ EnvMap, !Ref Environment, abbr ] 
+            - '-route2'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
+        
+  skIaCVpcRoute2Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref skIaCVpcRoute2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref skIaCNat2
+        
+## Subnet   
+
+### public 
+## Service Zone
+  SKIaCNATPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: NAT Public Subnet 1
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '0'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SKIaCNATPublicSubnet1Block
+      VpcId:
+        Ref: skIaCVpc
+      Tags:
+      - Key: Name
+        Value: 'service-nat-public-p-subnet1'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
+        
+  SKIaCNATPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SKIaCNATPublicSubnet1
+      RouteTableId: !Ref skIaCVpcRoute
+      
+  SKIaCNATPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Metadata:
+      Comment: NAT Public Subnet 2
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - '1'
+        - Fn::GetAZs:
+            Ref: AWS::Region
+      CidrBlock:
+        Ref: SKIaCNATPublicSubnet2Block
+      VpcId:
+        Ref: skIaCVpc
+      Tags:
+      - Key: Name
+        Value: 'service-nat-public-p-subnet2'
+      - Key: Project
+        Value: !Sub '${ProjectName}'
+      - Key: Env
+        Value: !Sub '${Environment}'
+      - Key: Operator
+        Value: !Sub '${OpsGroup}'
+      - Key: Region
+        Value: !Ref AWS::Region
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
+        
+  SKIaCNATPublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SKIaCNATPublicSubnet2
+      RouteTableId: !Ref skIaCVpcRoute     
+
+      
+## Security Group
+
+#----------------------[[ Outputs ]]-------------
+Outputs:
+  Templatename:
+    Description: 'Cloudformation for initial configuration of SK IaC standard infrastructure.'
+    Value: 'sk-IaC-infra-vpc-base-EKS-CIDR.yaml'
+    
+  TemplateVersion:
+    Description: 'sk-IaC-infra-vpc-base-EKS-CIDR.yaml version.'
+    Value: '1.0'
+    
+  stackname:
+    Description: 'First Stack name.'
+    Value: !Sub '${AWS::StackName}'
+    
+  projectname:
+    Description: 'project name.'
+    Value: !Sub '${ProjectName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-projectname'
+      
+  environment:
+    Description: Environment
+    Value: !Sub '${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-environment'
+
+  environmentabbr:
+    Description: 'Environment Abbr'
+    Value: !FindInMap [ EnvMap, !Ref Environment, 'abbr' ] 
+    Export:
+      Name: !Sub '${AWS::StackName}-environment-abbr'
+
+  skIaCVpcId:
+    Description: The VPC Id
+    Value: !Ref skIaCVpc
+    Export:
+      Name: !Sub '${AWS::StackName}-vpc'
+
+  skIaCVpcRoute:
+    Description: The VPC Public Route
+    Value: !Ref skIaCVpcRoute
+    Export:
+      Name: !Sub '${AWS::StackName}-route'
+
+  skIaCVpcRoute1:
+    Description: The VPC Private Route1 in AZ-a
+    Value: !Ref skIaCVpcRoute1
+    Export:
+      Name: !Sub '${AWS::StackName}-route1'
+      
+  skIaCVpcRoute2:
+    Description: The VPC Private Route1 in AZ-c
+    Value: !Ref skIaCVpcRoute2
+    Export:
+      Name: !Sub '${AWS::StackName}-route2'
