@@ -24,7 +24,7 @@ Metadata:
         Parameters:
           - ProjectName
           - Environment
-          - StackCreater
+          - StackCreator
           - SKIaCVpcMainBlock
           - SKIaCNATPublicSubnet1Block
           - SKIaCNATPublicSubnet2Block
@@ -47,10 +47,10 @@ Parameters:
       - develop
       - product
      
-  StackCreater:
+  StackCreator:
     Description: 'Enter your IAM User Name.'
     Type: String
-    Default: ds07297
+    Default: ca07297
 
   OpsGroup:
     Description: 'Enter Operation Group.'
@@ -139,8 +139,8 @@ Resources:
         Value: !Sub '${Environment}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'        
+      - Key: Creator
+        Value: !Sub '${StackCreator}'        
 
   skIaCVpcIgw:
     Type: 'AWS::EC2::InternetGateway'
@@ -158,8 +158,8 @@ Resources:
         Value: !Sub '${Environment}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
 
   VPCGatewayAttachment:
     Type: "AWS::EC2::VPCGatewayAttachment"
@@ -185,8 +185,8 @@ Resources:
         Value: !Sub '${Environment}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
 
   skIaCVpcRouteRoute:
     DependsOn: VPCGatewayAttachment
@@ -216,8 +216,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'  
+      - Key: Creator
+        Value: !Sub '${StackCreator}'  
       - Key: Purpose
         Value: !Join 
           - ''
@@ -245,8 +245,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'  
+      - Key: Creator
+        Value: !Sub '${StackCreator}'  
       - Key: Purpose
         Value: !Join 
           - ''
@@ -277,8 +277,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
 
   skIaCNat2:
     DependsOn: VPCGatewayAttachment
@@ -301,8 +301,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
         
 ## private route table
   skIaCVpcRoute1:
@@ -324,8 +324,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'
+      - Key: Creator
+        Value: !Sub '${StackCreator}'
         
   skIaCVpcRoute1Route:
     Type: AWS::EC2::Route
@@ -353,8 +353,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
         
   skIaCVpcRoute2Route:
     Type: AWS::EC2::Route
@@ -392,8 +392,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
         
   SKIaCNATPublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -426,8 +426,8 @@ Resources:
         Value: !Sub '${OpsGroup}'
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
         
   SKIaCNATPublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation

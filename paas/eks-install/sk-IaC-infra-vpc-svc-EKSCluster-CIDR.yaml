@@ -23,7 +23,7 @@ Metadata:
           default: "Set service network information for infrastructure configuration."
         Parameters:
           - ParentVpcStack
-          - StackCreater
+          - StackCreator
           - SVCDataPlanePublicSubnet1Block
           - SVCDataPlanePublicSubnet2Block          
           - SVCDataPlanePrivateSubnet1Block
@@ -36,7 +36,7 @@ Parameters:
     Description: 'Enter the stack name created by Cloudformation for initial configuration among SK IaC standard infrastructure.'
     Type: String
 
-  StackCreater:
+  StackCreator:
     Description: 'Enter your IAM User Name.'
     Type: String
     Default: your-iamuserid
@@ -131,8 +131,8 @@ Resources:
         Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}' 
+      - Key: Creator
+        Value: !Sub '${StackCreator}' 
       - Key: Operator
         Value: !Sub '${OpsGroup}'
       - Key: Purpose
@@ -175,8 +175,8 @@ Resources:
         Value: !Ref AWS::Region
       - Key: Operator
         Value: !Sub '${OpsGroup}'
-      - Key: Creater
-        Value: !Sub '${StackCreater}'    
+      - Key: Creator
+        Value: !Sub '${StackCreator}'    
       - Key: Purpose
         Value: 'service for dataplane in (us-west-1b)'
       - Key: 'kubernetes.io/role/elb'
@@ -218,8 +218,8 @@ Resources:
         Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
       - Key: Operator
         Value: !Sub '${OpsGroup}'
       - Key: Purpose
@@ -259,8 +259,8 @@ Resources:
         Value: {'Fn::ImportValue': !Sub '${ParentVpcStack}-environment'} 
       - Key: Region
         Value: !Ref AWS::Region
-      - Key: Creater
-        Value: !Sub '${StackCreater}'      
+      - Key: Creator
+        Value: !Sub '${StackCreator}'      
       - Key: Operator
         Value: !Sub '${OpsGroup}'
       - Key: Purpose
