@@ -1,9 +1,9 @@
 ---
 ########################################################################################################
-# Templatename : sk-IaC-infra-vpc-base-EKS-CIDR.yaml
+# Templatename : sk-IaC-infra-vpc-base-iaas-use-nat.yaml
 # Purpose : Cloudformation for initial configuration of SK IaC standard infrastructure
 #           Network basic composition such as VPC among static resources 
-#           Reference Architecture : EKS Type 1 ( 1 vpc Overlay Cidr for Another Pod network ip pool )
+#           Reference Architecture : IaaS Type 1 
 # ------------------------------------------------------------------------------------------------------
 #  version :     date      :    developer      :  reason
 #  -------   -------------   -----------------   -------------------------------------------------------
@@ -12,7 +12,7 @@
 ########################################################################################################
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-   'Cloudformation for initial configuration of SK IaC standard infrastructure (Reference Architecture : EKS Type 1)'
+   'Cloudformation for initial configuration of SK IaC standard infrastructure (Reference Architecture : IaaS Type 1)'
 
 #----------------------[[ Metadata ]]-------------
 Metadata:
@@ -37,7 +37,7 @@ Parameters:
   ProjectName:
     Description: 'Project Business System Abbr. (Please enter an abbreviation).'
     Type: String
-    Default: ekstst
+    Default: edu-iaas
 
   Environment:
     Description: 'Select the Infra environment use you want to configure.'
@@ -55,7 +55,7 @@ Parameters:
   OpsGroup:
     Description: 'Enter Operation Group.'
     Type: String
-    Default: infra-group
+    Default: hybridcloud1-group
 
     
 #  Project Info End  <<<<<    
@@ -63,7 +63,7 @@ Parameters:
 # >>>> VPC Info Start    
   SKIaCVpcMainBlock:
     Type: String
-    Default: 100.64.16.0/20
+    Default: 10.16.0.0/16
     Description: The CIDR range for the VPC. This should be a valid private (RFC 1918 or RFC 6598 - 100.64.xxx.xxx ) CIDR range.
 
 # VPC Info End  <<<<<
@@ -75,12 +75,12 @@ Parameters:
 ## Service Zone
   SKIaCNATPublicSubnet1Block:
     Type: String
-    Default: 100.64.16.0/24
+    Default: 10.16.0.0/24
     Description: CidrBlock for service-nat-public-[p/d]-subnet1 within the VPC
 
   SKIaCNATPublicSubnet2Block:
     Type: String
-    Default: 100.64.17.0/24
+    Default: 10.16.128.0/24
     Description: CidrBlock for service-nat-public-[p/d]-subnet2 within the VPC  
 
 ########## Public Network ###############
@@ -442,10 +442,10 @@ Resources:
 Outputs:
   Templatename:
     Description: 'Cloudformation for initial configuration of SK IaC standard infrastructure.'
-    Value: 'sk-IaC-infra-vpc-base-EKS-CIDR.yaml'
+    Value: 'sk-IaC-infra-vpc-base-iaas-use-nat.yaml'
     
   TemplateVersion:
-    Description: 'sk-IaC-infra-vpc-base-EKS-CIDR.yaml version.'
+    Description: 'sk-IaC-infra-vpc-base-iaas-use-nat.yaml version.'
     Value: '1.0'
     
   stackname:
