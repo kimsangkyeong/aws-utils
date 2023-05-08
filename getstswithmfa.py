@@ -31,13 +31,16 @@ def getAWSInfo(argv):
             break
         print(".. error : account_num 12자리 정보를 다시 입력해 주세요~") 
     awsinfo['iamuser_id']    = input("iamuser_id : ")
+
+    awsinfo['serial_number_mfa']   = input("serial_number_mfa : ")
+    # awsinfo['serial_number_mfa'] = 'arn:aws:iam::' + awsinfo['account_num'] + ':mfa/' + awsinfo['iamuser_id']
+    
     LEN_TOKENCODE_MFA = 6 # OTP mfa token code 자릿수
     while True:
         awsinfo['tokencode_mfa'] = input("tokencode_mfa : ")
         if LEN_TOKENCODE_MFA == len(awsinfo['tokencode_mfa']):
             break
         print(".. error : tokencode_mfa 6자리 정보를 다시 입력해 주세요~") 
-    awsinfo['serial_number_mfa'] = 'arn:aws:iam::' + awsinfo['account_num'] + ':mfa/' + awsinfo['iamuser_id']
     print(awsinfo)
     return True
 
