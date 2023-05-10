@@ -1,7 +1,7 @@
 ##############################################################################
 # 목적 : MFA 설정 IAM User의 STS Session 정보를 Config 파일에 자동 설정하기     #
 # 조건 : python, boto3 package, aws cli 설치되어 있어야 함                     #
-# 기능 : 1. AWS Account 계정, IAM User 정보, MFA OTP Token 값을 입력           #
+# 기능 : 1. AWS Account 계정, IAM User 정보, serial_number_mfa, MFA OTP Token 값을 입력           #
 #        2.자동으로 Session 정보를 credential 파일에 mfa profile로 셋팅        #
 #        3. aws s3 ls --profile mfa   처럼 사용하면 됨.                       #
 # 기타 : STS Session 유지시간은 12시간으로 설정                                #
@@ -113,3 +113,22 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
+###### < 최종 이미지 > ####
+# 1. 파일 구성 : .aws/credentials
+#                $aws sts get-session-token --serial-number MFA_NUM --token-code CODE_FROM_MFA
+#                실행결과 값을 mfa로 셋팅
+#                [mfa]
+#                aws_access_key_id = ID_FROM_ABOVE
+#                aws_secret_access_key = KEY_FROM_ABOVE
+#                aws_session_token = TOKEN_FROM_ABOVE
+# 2. 파일 구성 : .aws/config
+#                [mfa]
+#                output = json
+#                region = us-east-1
+#
+#                [profile secondaccount]
+#                role_arn = arn:aws:iam::<SECOND_ACCOUNT_ID>:role/admin
+#                source_profile = mfa
+# 3. 실행 예시 : $aws s3 ls --profile mfa
+#######
