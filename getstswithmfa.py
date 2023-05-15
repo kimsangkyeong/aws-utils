@@ -22,8 +22,6 @@ def setEnvironment():
     sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
     #print("stdin - {}, stdout - {}, stderr - {}".format(sys.stdin.encoding, sys.stdout.encoding, sys.stderr.encoding))
 
-my_os = sys.platform
-
 awsinfo = {'account_num':'','iamuser_id':'','tokencode_mfa':'','serial_number_mfa':'' }
 stsinfo = {'aws_access_key_id':'','aws_secret_access_key':'','aws_session_token':''}
 def getAWSInfo(argv):
@@ -79,29 +77,25 @@ def setCredentialsConfig():
             lines = fread.readlines();
 
         finded_mfa = False
-        newlines = [];  envlines = []
+        newlines = [];  envlines_linux = []; envlines_win = [];
+        envlines_linux.append('[Linux Envirionment]')
+        envlines_win.append('[Windows Envirionment]')
         for idx, line in enumerate(lines) :
             if '[mfa]' in line :
                 finded_mfa = True
             if finded_mfa :
                 if 'aws_access_key_id' in line :
                     line = 'aws_access_key_id = ' + stsinfo['aws_access_key_id'] + '\n'
-                    if my_os == "linux" :
-                        envlines.append('export AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
-                    else :
-                        envlines.append('SET AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
+                    envlines_linux.append('export AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
+                    envlines_win.append('SET AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
                 if 'aws_secret_access_key' in line :
                     line = 'aws_secret_access_key = ' + stsinfo['aws_secret_access_key'] + '\n'
-                    if my_os == "linux" :
-                        envlines.append('export AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
-                    else :
-                        envlines.append('SET AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
+                    envlines_linux.append('export AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
+                    envlines_win.append('SET AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
                 if 'aws_session_token' in line :
                     line = 'aws_session_token = ' + stsinfo['aws_session_token'] + '\n'
-                    if my_os == "linux" :
-                        envlines.append('export AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
-                    else :
-                        envlines.append('SET AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
+                    envlines_linux.append('export AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
+                    envlines_win.append('SET AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
             newlines.append(line)
 
         if not finded_mfa :
@@ -109,20 +103,18 @@ def setCredentialsConfig():
             newlines.append('aws_access_key_id = ' + stsinfo['aws_access_key_id'] + '\n')
             newlines.append('aws_secret_access_key = ' + stsinfo['aws_secret_access_key'] + '\n')
             newlines.append('aws_session_token = ' + stsinfo['aws_session_token'] + '\n')
-            if my_os == "linux" :
-                envlines.append('export AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
-                envlines.append('export AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
-                envlines.append('export AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
-            else :
-                envlines.append('SET AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
-                envlines.append('SET AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
-                envlines.append('SET AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
+            envlines_linux.append('export AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
+            envlines_linux.append('export AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
+            envlines_linux.append('export AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
+            envlines_win.append('SET AWS_ACCESS_KEY_ID=' + stsinfo['aws_access_key_id'])
+            envlines_win.append('SET AWS_SECRET_ACCESS_KEY=' + stsinfo['aws_secret_access_key'])
+            envlines_win.append('SET AWS_SESSION_TOKEN=' + stsinfo['aws_session_token'])
 
         with open(CONFIG_FILE, 'w') as fwrite:
             fwrite.writelines(newlines)
 
-        print('My OS Platform : ', my_os)
-        print(envlines)
+        print(envlines_linux)
+        print(envlines_win)
 
         return True
     except Exception as errinfo:
